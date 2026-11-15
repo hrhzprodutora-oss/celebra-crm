@@ -926,7 +926,7 @@
     // SUPABASE & AUTENTICAÇÃO DIRETORIA
     // ==========================================
     const SUPABASE_URL = "https://ddehyuertafctuhnfgpn.supabase.co";
-    let SUPABASE_ANON_KEY = localStorage.getItem('celebra_supabase_anon_key') || "";
+    let SUPABASE_ANON_KEY = "sb_publishable_GPBZkeBWljCdCnzf-1MH7w_yuR2JWPw";
     let supabaseClient = null;
 
     function inicializarSupabase() {
@@ -1087,32 +1087,38 @@
       }
     }
 
-    // SINCRONIZAÇÃO EM TEMPO REAL COM O SUPABASE POSTGRESQL
+    // SINCRONIZAÇÃO EM TEMPO REAL COM O SUPABASE POSTGRESQL (VIA REST API NATIVA)
     async function sincronizarComSupabase() {
-      if (!supabaseClient) return;
+      const key = SUPABASE_ANON_KEY || "sb_publishable_GPBZkeBWljCdCnzf-1MH7w_yuR2JWPw";
       try {
-        const { data, error } = await supabaseClient
-          .from('formandos')
-          .select('*')
-          .order('num', { ascending: true });
-
-        if (error) throw error;
-        if (data && data.length > 0) {
-          FORMANDOS = data.map(f => ({
-            num: f.num || 1,
-            nome: f.nome,
-            resp: f.responsavel,
-            tel: f.contato || '',
-            cpf: f.cpf || '',
-            email: f.email || '',
-            forma: f.forma_pagamento || 'Boleto',
-            total: parseFloat(f.valor_total) || 3990,
-            pago: parseFloat(f.valor_pago) || 0,
-            falta: parseFloat(f.valor_falta) || 0,
-            status: f.status || 'em_andamento'
-          }));
-          renderizarTabela(FORMANDOS);
-          console.log(`Carregados ${data.length} formandos direto do Supabase PostgreSQL!`);
+        const res = await fetch("https://ddehyuertafctuhnfgpn.supabase.co/rest/v1/formandos?select=*&order=num.asc", {
+          headers: {
+            'apikey': key,
+            'Authorization': 'Bearer ' + key
+          }
+        });
+        if (res.ok) {
+          const data = await res.json();
+          if (data && data.length > 0) {
+            FORMANDOS = data.map(f => ({
+              num: f.num || 1,
+              nome: f.nome,
+              resp: f.responsavel,
+              tel: f.contato || '',
+              cpf: f.cpf || '',
+              email: f.email || '',
+              forma: f.forma_pagamento || 'Boleto',
+              total: parseFloat(f.valor_total) || 3990,
+              pago: parseFloat(f.valor_pago) || 0,
+              falta: parseFloat(f.valor_falta) || 0,
+              status: f.status || 'em_andamento'
+            }));
+            renderizarTabela(FORMANDOS);
+            console.log(`✅ SUCESSO: ${data.length} formandos carregados ao vivo do Supabase PostgreSQL!`);
+            atualizarStatusSupabaseUI(true);
+          }
+        } else {
+          console.warn("Status Supabase:", res.status);
         }
       } catch(e) {
         console.warn("Aviso ao buscar dados do Supabase:", e);

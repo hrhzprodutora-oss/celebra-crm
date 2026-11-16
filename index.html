@@ -152,7 +152,7 @@
           <label class="block text-xs font-bold text-gray-300 mb-1.5">Senha de Acesso</label>
           <div class="relative">
             <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 text-gray-400 text-sm">🔑</span>
-            <input type="password" id="loginSenha" required placeholder="Digite sua senha" value="" class="w-full pl-10 pr-4 py-3 bg-[#1C1628] border border-gray-700/80 rounded-2xl text-sm text-white placeholder-gray-500 focus:outline-none focus:border-[#E90064] focus:ring-2 focus:ring-[#E90064]/20 transition-all">
+            <input type="password" id="loginSenha" required placeholder="Digite sua senha" value="" onkeydown="if(event.key==='Enter'){ realizarLoginDiretoria(event); }" class="w-full pl-10 pr-4 py-3 bg-[#1C1628] border border-gray-700/80 rounded-2xl text-sm text-white placeholder-gray-500 focus:outline-none focus:border-[#E90064] focus:ring-2 focus:ring-[#E90064]/20 transition-all">
           </div>
         </div>
 
@@ -1302,7 +1302,14 @@
     function inicializarSupabase() {
       if (typeof supabase !== 'undefined' && SUPABASE_ANON_KEY) {
         try {
-          supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+          supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+            auth: {
+              persistSession: true,
+              autoRefreshToken: true,
+              detectSessionInUrl: true,
+              lock: false
+            }
+          });
           console.log("✅ Supabase inicializado com sucesso!");
           atualizarStatusSupabaseUI(true);
           sincronizarComSupabase();
@@ -1379,62 +1386,106 @@
 
     // LOGIN & SESSÃO
     async function realizarLoginDiretoria(e) {
-      if (e) e.preventDefault();
-      const email = document.getElementById('loginEmail').value.trim();
-      const senha = document.getElementById('loginSenha').value;
+      if (e && e.preventDefault) e.preventDefault();
+      const emailInput = document.getElementById('loginEmail');
+      const senhaInput = document.getElementById('loginSenha');
+      const email = emailInput ? emailInput.value.trim() : '';
+      const senha = senhaInput ? senhaInput.value : '';
       const erroEl = document.getElementById('loginErro');
-      erroEl.classList.add('hidden');
+      if (erroEl) erroEl.classList.add('hidden');
+
+      if (!email || !senha) {
+        if (erroEl) {
+          erroEl.innerText = "Por favor, digite seu e-mail e senha de acesso.";
+          erroEl.classList.remove('hidden');
+        }
+        return;
+      }
 
       const btn = document.getElementById('btnEntrarLogin');
-      const originalText = btn.innerHTML;
-      btn.innerHTML = `<span class="animate-spin text-sm">⏳</span><span>Acessando...</span>`;
+      const originalText = btn ? btn.innerHTML : 'Entrar no Sistema →';
+      if (btn) btn.innerHTML = `<span class="animate-spin text-sm">⏳</span><span>Acessando...</span>`;
 
-      // 1. Validação com Supabase Auth e Contingência Offline
-      const isBackupValido = (email.toLowerCase() === 'mariamvpinheiro@gmail.com' && senha === '280307') ||
-                             (email.toLowerCase() === 'celebraeventosofc@gmail.com' && senha === 'Maria2803!') ||
-                             (senha.includes('Celebra'));
+      // Validação das contas oficiais conhecidas (Login Imediato sem trava de rede)
+      const isMaria = email.toLowerCase() === 'mariamvpinheiro@gmail.com' && senha === '280307';
+      const isLuana = email.toLowerCase() === 'celebraeventosofc@gmail.com' && senha === 'Maria2803!';
+      const isMasterCelebra = senha.includes('Celebra');
 
+      if (isMaria || isLuana || isMasterCelebra) {
+        const diretora = isMaria || email.toLowerCase().includes('maria') || email.toLowerCase().includes('pinheiro') || email.toLowerCase().includes('mv') ? 'maria' : 'luana';
+        concluirLoginSucesso(diretora, email);
+        if (supabaseClient) {
+          supabaseClient.auth.signInWithPassword({ email: email, password: senha }).catch(() => {});
+        }
+        return;
+      }
+
+      // Se for outra conta, autentica no Supabase com limite de 3.5 segundos
       if (supabaseClient) {
         try {
-          const { data, error } = await supabaseClient.auth.signInWithPassword({
-            email: email,
-            password: senha
-          });
-          if (error && !isBackupValido) {
-            erroEl.innerText = "E-mail ou senha incorretos no Supabase: " + (error.message || 'Verifique seus dados');
-            erroEl.classList.remove('hidden');
-            btn.innerHTML = originalText;
+          const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error('Tempo limite de conexão esgotado.')), 3500));
+          const { data, error } = await Promise.race([
+            supabaseClient.auth.signInWithPassword({ email: email, password: senha }),
+            timeoutPromise
+          ]);
+
+          if (error) {
+            if (erroEl) {
+              erroEl.innerText = "E-mail ou senha incorretos: " + (error.message || 'Verifique seus dados');
+              erroEl.classList.remove('hidden');
+            }
+            if (btn) btn.innerHTML = originalText;
             return;
           }
+
+          let diretora = (email.toLowerCase().includes('maria') || email.toLowerCase().includes('pinheiro') || email.toLowerCase().includes('mv')) ? 'maria' : 'luana';
+          concluirLoginSucesso(diretora, email);
+          return;
         } catch(err) {
           console.warn("Aviso Auth Supabase:", err);
-          if (!isBackupValido) {
-            erroEl.innerText = "Não foi possível conectar ao servidor de login. Tente novamente.";
+          if (erroEl) {
+            erroEl.innerText = "Erro ao conectar com o Supabase: " + (err.message || 'Tente novamente');
             erroEl.classList.remove('hidden');
-            btn.innerHTML = originalText;
-            return;
           }
+          if (btn) btn.innerHTML = originalText;
+          return;
         }
-      }
-
-      // 2. Identifica se é Luana ou Maria Clara
-      let diretora = 'luana';
-      if (email.toLowerCase().includes('maria') || email.toLowerCase().includes('pinheiro') || email.toLowerCase().includes('mv')) {
-        diretora = 'maria';
       } else {
-        diretora = 'luana';
+        if (erroEl) {
+          erroEl.innerText = "Servidor de autenticação offline.";
+          erroEl.classList.remove('hidden');
+        }
+        if (btn) btn.innerHTML = originalText;
       }
+    }
 
-      // Salva sessão
+    function concluirLoginSucesso(diretora, email) {
       localStorage.setItem('celebra_sessao_ativa', 'true');
       localStorage.setItem('celebra_usuario_logado', diretora);
       localStorage.setItem('celebra_email_logado', email);
 
       selecionarDiretora(diretora);
-      btn.innerHTML = originalText;
 
-      const card = document.getElementById('cardLoginBox'); if(card) card.style.transform = 'translateY(-30px) scale(0.96)'; card.style.opacity = '0'; setTimeout(() => { document.getElementById('telaLogin').classList.add('hidden'); mostrarNotificacaoSwiftUI('Bem-vinda, ' + (user === 'luana' ? 'Luana' : 'Maria Clara'), 'Painel da Celebra Eventos pronto.', 'sucesso'); }, 400);
-      document.getElementById('appPrincipal').classList.remove('hidden');
+      const card = document.getElementById('cardLoginBox');
+      if (card) {
+        card.style.transform = 'translateY(-30px) scale(0.96)';
+        card.style.opacity = '0';
+      }
+
+      const tela = document.getElementById('telaLogin');
+      if (tela) {
+        tela.style.transition = 'opacity 0.25s ease';
+        tela.style.opacity = '0';
+        setTimeout(() => {
+          tela.classList.add('hidden');
+          tela.style.opacity = '1';
+        }, 250);
+      }
+
+      const app = document.getElementById('appPrincipal');
+      if (app) app.classList.remove('hidden');
+
+      mostrarNotificacaoSwiftUI('Bem-vinda, ' + (diretora === 'luana' ? 'Luana' : 'Maria Clara'), 'Painel da Celebra Eventos pronto.', 'sucesso');
     }
 
     function loginRapido(diretora) {

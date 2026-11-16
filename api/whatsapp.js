@@ -1,5 +1,5 @@
 // =========================================================================
-// API OFICIAL CELEBRA EVENTOS - WEBHOOK WHATSAPP (EVOLUTION API + GEMINI 3.8 FLASH + SUPABASE)
+// CANAL FINANCEIRO OFICIAL - CELEBRA EVENTOS (WEBHOOK WHATSAPP)
 // =========================================================================
 
 const SUPABASE_URL = "https://ddehyuertafctuhnfgpn.supabase.co";
@@ -21,7 +21,7 @@ export default async function handler(req, res) {
   if (req.method === 'GET') {
     return res.status(200).json({
       status: 'online',
-      sistema: 'Celebra Eventos CRM Webhook',
+      canal: 'Canal Financeiro Celebra Eventos',
       instancia: INSTANCE_NAME,
       ia_modelo: 'Gemini 3.8 Flash',
       timestamp: new Date().toISOString()
@@ -52,17 +52,17 @@ export default async function handler(req, res) {
     const senderNumber = remoteJid.replace(/\D/g, '');
     const message = data.message || {};
     
-    // Detectar imagem / anexo
+    // Detectar imagem / anexo de comprovante
     const base64Data = data.base64 || '';
     const hasImage = Boolean(message.imageMessage || (message.documentMessage && message.documentMessage.mimetype?.includes('image')) || (base64Data && base64Data.length > 500));
 
-    console.log(`📱 [WhatsApp Celebra] Mensagem de ${senderNumber} | Tem Anexo/Imagem: ${hasImage}`);
+    console.log(`📱 [Financeiro Celebra] Mensagem de ${senderNumber} | Anexo: ${hasImage}`);
 
-    // CASO 1: IMAGEM DE COMPROVANTE
+    // CASO 1: IMAGEM DE COMPROVANTE PIX
     if (hasImage && GEMINI_API_KEY) {
       let imgBase64 = base64Data;
       
-      // Se não veio direto no data.base64, tenta obter via endpoint da Evolution
+      // Se não veio direto, busca via API
       if (!imgBase64 && data.messageId) {
         try {
           const mediaRes = await fetch(`${EVOLUTION_URL}/chat/getBase64FromMediaMessage/${INSTANCE_NAME}`, {
@@ -82,7 +82,7 @@ export default async function handler(req, res) {
 
       if (imgBase64) {
         const ocr = await processarComprovanteComGemini(imgBase64, GEMINI_API_KEY);
-        console.log('🧠 [Gemini 3.8 Flash] Resultado:', ocr);
+        console.log('🧠 [Gemini 3.8 Flash] Resultado OCR:', ocr);
 
         if (ocr && ocr.valor) {
           const formando = await buscarFormandoNoSupabase(senderNumber, ocr.nome_pagador);
@@ -90,9 +90,9 @@ export default async function handler(req, res) {
 
           if (formando) {
             await atualizarPagamentoSupabase(formando, ocr.valor);
-            resposta = `Olá, *${formando.responsavel || formando.nome}*! 🎓✨\n\nRecebemos com sucesso o seu comprovante Pix no valor de *R$ ${ocr.valor.toFixed(2)}* referente à aluna(o) *${formando.nome}*!\n\n✅ *Status:* Pagamento registrado e parcela baixada no sistema da Celebra Eventos.\n⏳ *Reta Final:* Faltam poucos dias para o baile do Terceirão no Guerrah Hall!\n\nObrigado pela pontualidade! Qualquer dúvida, Luana e Maria Clara estão à disposição. 🎉`;
+            resposta = `Olá, *${formando.responsavel || formando.nome}*! 🎓✨\n\nConfirmamos o recebimento do seu comprovante Pix no valor de *R$ ${ocr.valor.toFixed(2)}* referente à matrícula de *${formando.nome}*!\n\n✅ *Status:* Pagamento registrado e parcela baixada com sucesso no sistema.\n⏳ *Reta Final:* Faltam poucos dias para a formatura do Terceirão no Guerrah Hall!\n\nAgradecemos a pontualidade! Qualquer dúvida, nossa equipe financeira está à disposição. 💼🎉`;
           } else {
-            resposta = `Olá! 🎓✨\n\nRecebemos o seu comprovante no valor de *R$ ${ocr.valor.toFixed(2)}*.\n\nNossa equipe de Diretoria da Celebra Eventos já foi notificada para validar e vincular este pagamento ao cadastro da sua família no sistema.\n\nMuito obrigado! Luana e Maria Clara estão à disposição. 🎉`;
+            resposta = `Olá! 🎓✨\n\nIdentificamos o envio do comprovante no valor de *R$ ${ocr.valor.toFixed(2)}*.\n\nNossa equipe financeira já foi notificada para conferir e vincular este pagamento ao cadastro da sua família no sistema da Celebra Eventos.\n\nMuito obrigado! Qualquer dúvida, nossa equipe está à disposição. 💼🎉`;
           }
 
           await enviarWhatsApp(senderNumber, resposta);
@@ -101,14 +101,14 @@ export default async function handler(req, res) {
       }
     }
 
-    // CASO 2: MENSAGEM DE TEXTO COMUM
+    // CASO 2: MENSAGEM DE TEXTO (SAUDAÇÃO / DÚVIDAS NO CANAL FINANCEIRO)
     const textMsg = (message.conversation || message.extendedTextMessage?.text || '').trim();
     if (textMsg && textMsg.length < 50) {
       const lower = textMsg.toLowerCase();
-      if (lower.includes('oi') || lower.includes('olá') || lower.includes('ola') || lower.includes('bom dia') || lower.includes('boa tarde')) {
-        const saudacao = `Olá! Seja muito bem-vindo(a) ao canal oficial da *Celebra Eventos*! 🎓✨\n\nEstamos na contagem regressiva para a formatura do Terceirão no *Guerrah Hall*!\n\n📸 *Deseja enviar um comprovante Pix?*\nBasta enviar a foto ou PDF do comprovante aqui nesta conversa que nossa IA já faz a leitura e baixa da sua parcela na hora!\n\nPara falar com a Diretoria, deixe sua mensagem que Luana e Maria Clara responderão em breve! 🎉`;
+      if (lower.includes('oi') || lower.includes('olá') || lower.includes('ola') || lower.includes('bom dia') || lower.includes('boa tarde') || lower.includes('boa noite') || lower.includes('ajuda')) {
+        const saudacao = `Olá! Seja bem-vindo(a) ao *Canal Financeiro Oficial da Celebra Eventos*! 💳🎓\n\nEste canal é exclusivo para atendimento financeiro, envio de comprovantes Pix e baixa de parcelas da formatura do *Terceirão Aprovado (Guerrah Hall)*.\n\n📸 *Envio de Comprovante:*\nBasta enviar a foto ou PDF do seu comprovante Pix diretamente aqui na conversa. Nosso sistema faz a conferência e a baixa automática no cadastro do formando!\n\nCaso tenha alguma dúvida financeira, envie sua mensagem que nossa equipe responderá em breve. 💼✨`;
         await enviarWhatsApp(senderNumber, saudacao);
-        return res.status(200).json({ success: true, acao: 'auto_reply' });
+        return res.status(200).json({ success: true, acao: 'auto_reply_financeiro' });
       }
     }
 

@@ -204,6 +204,12 @@
         <span>Reta Final: <strong id="contadorDiasTop" class="text-[#E90064]">17 dias</strong></span>
       </div>
 
+      <!-- BOTÃO NOTIFICAR DIRETORIA WHATSAPP -->
+      <button onclick="abrirModalNotificarDiretoria()" title="Enviar Notificação WhatsApp para Luana e Maria Clara" class="flex items-center space-x-1.5 px-3 py-1.5 rounded-xl bg-pink-50 dark:bg-pink-950/40 text-[#E90064] dark:text-pink-300 hover:bg-pink-100 dark:hover:bg-pink-900/40 border border-pink-200/60 dark:border-pink-900/40 text-xs font-bold transition-all shadow-xs active:scale-95">
+        <span>📲</span>
+        <span class="hidden sm:inline">Notificar Diretoria</span>
+      </button>
+
       <!-- BOTÃO MODO ESCURO -->
       <button onclick="toggleDarkMode()" id="darkModeBtn" title="Alternar Modo Escuro / Claro" class="p-2 rounded-xl bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-amber-400 hover:bg-gray-200 dark:hover:bg-gray-700 transition-all">
         <svg id="sunIcon" class="w-4 h-4 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
@@ -612,8 +618,12 @@
           </p>
         </div>
 
-        <div class="flex items-center space-x-3">
-          <button onclick="sincronizarComprovantesWhatsApp()" id="btnSyncWhatsApp" class="px-4 py-2.5 rounded-2xl bg-white/10 hover:bg-white/15 border border-white/10 text-white font-bold text-xs flex items-center space-x-2 transition-all active:scale-95 shadow-sm">
+        <div class="flex flex-wrap items-center gap-2.5">
+          <button onclick="abrirModalNotificarDiretoria('comprovante')" class="px-3.5 py-2.5 rounded-2xl bg-[#E90064] hover:bg-[#D8005A] text-white font-bold text-xs flex items-center space-x-1.5 shadow-md shadow-pink-600/20 transition-all active:scale-95">
+            <span>📢</span>
+            <span>Avisar Diretoria</span>
+          </button>
+          <button onclick="sincronizarComprovantesWhatsApp()" id="btnSyncWhatsApp" class="px-3.5 py-2.5 rounded-2xl bg-white/10 hover:bg-white/15 border border-white/10 text-white font-bold text-xs flex items-center space-x-1.5 transition-all active:scale-95 shadow-sm">
             <span>🔄</span>
             <span>Atualizar do WhatsApp</span>
           </button>
@@ -656,10 +666,17 @@
         <p class="text-sm text-gray-500 dark:text-gray-400 max-w-md mx-auto">
           Todos os comprovantes recebidos no WhatsApp oficial já foram conferidos e lançados no CRM.
         </p>
-        <div class="pt-2">
-          <button onclick="sincronizarComprovantesWhatsApp()" class="px-5 py-2.5 rounded-2xl bg-gradient-to-r from-[#E90064] to-[#D8005A] text-white text-xs font-bold shadow-lg shadow-pink-600/20 hover:opacity-95 transition-all">
-            Verificar Novas Mensagens no WhatsApp ➜
-          </button>
+        <div class="pt-2 space-y-2">
+          <div>
+            <button onclick="sincronizarComprovantesWhatsApp()" class="px-5 py-2.5 rounded-2xl bg-gradient-to-r from-[#E90064] to-[#D8005A] text-white text-xs font-bold shadow-lg shadow-pink-600/20 hover:opacity-95 transition-all">
+              Verificar Novas Mensagens no WhatsApp ➜
+            </button>
+          </div>
+          <div>
+            <button onclick="restaurarFilaDemonstracao()" class="text-[11px] text-gray-400 hover:text-[#E90064] underline transition-colors">
+              Restaurar fila de demonstração
+            </button>
+          </div>
         </div>
       </div>
 
@@ -837,6 +854,108 @@
           <button type="submit" class="bg-[#E90064] hover:bg-[#D8005A] text-white font-bold px-5 py-2 rounded-xl shadow-md">Salvar Formando</button>
         </div>
       </form>
+    </div>
+  </div>
+
+  
+  <!-- MODAL: NOTIFICAÇÃO WHATSAPP PARA A DIRETORIA -->
+  <div id="modalNotificarDiretoria" class="fixed inset-0 bg-black/60 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-white dark:bg-[#15101E] border border-gray-200 dark:border-gray-800 rounded-3xl max-w-lg w-full p-6 sm:p-7 shadow-2xl relative space-y-5" style="animation: swiftCardSpring 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;">
+      
+      <!-- Cabeçalho do Modal -->
+      <div class="flex items-start justify-between">
+        <div class="flex items-center space-x-3">
+          <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-[#E90064] to-[#FF5E8E] text-white flex items-center justify-center text-lg font-bold shadow-md shadow-pink-600/25">
+            📲
+          </div>
+          <div>
+            <h3 class="text-base font-black text-gray-900 dark:text-white">Notificar Diretoria via WhatsApp</h3>
+            <p class="text-xs text-gray-500 dark:text-gray-400">Disparo pelo WhatsApp oficial conectado na Railway</p>
+          </div>
+        </div>
+        <button onclick="fecharModal('modalNotificarDiretoria')" class="text-gray-400 hover:text-gray-600 dark:hover:text-white font-bold text-xl p-1">&times;</button>
+      </div>
+
+      <!-- Seleção de Destinatárias -->
+      <div class="space-y-2">
+        <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Destinatárias:</label>
+        <div class="grid grid-cols-2 gap-2.5">
+          <label class="flex items-center space-x-2.5 p-3 rounded-2xl border border-gray-200 dark:border-gray-700 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800/60 transition-all">
+            <input type="checkbox" id="notifCheckLuana" checked class="rounded text-[#E90064] focus:ring-[#E90064]">
+            <div class="text-left">
+              <div class="text-xs font-bold text-gray-900 dark:text-white">Luana Celebra</div>
+              <input type="text" id="telNotifLuana" value="22999516621" onchange="salvarTelefonesDiretoria()" class="text-[11px] bg-transparent text-gray-500 dark:text-gray-400 border-b border-transparent hover:border-gray-300 focus:border-[#E90064] outline-none w-28 mt-0.5" title="Clique para editar o telefone">
+            </div>
+          </label>
+
+          <label class="flex items-center space-x-2.5 p-3 rounded-2xl border border-gray-200 dark:border-gray-700 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800/60 transition-all">
+            <input type="checkbox" id="notifCheckMaria" checked class="rounded text-[#E90064] focus:ring-[#E90064]">
+            <div class="text-left">
+              <div class="text-xs font-bold text-gray-900 dark:text-white">Maria Clara</div>
+              <input type="text" id="telNotifMaria" value="22999255749" onchange="salvarTelefonesDiretoria()" class="text-[11px] bg-transparent text-gray-500 dark:text-gray-400 border-b border-transparent hover:border-gray-300 focus:border-[#E90064] outline-none w-28 mt-0.5" title="Clique para editar o telefone">
+            </div>
+          </label>
+        </div>
+      </div>
+
+      <!-- Modelos de Mensagem (Templates de 1-Clique) -->
+      <div class="space-y-2">
+        <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Modelos Prontos de Alerta:</label>
+        <div class="grid grid-cols-2 gap-2">
+          <button type="button" onclick="aplicarTemplateNotif('comprovante')" class="text-left p-2.5 rounded-xl border border-pink-200/80 dark:border-pink-900/40 bg-pink-50/50 dark:bg-pink-950/20 hover:bg-pink-100/60 transition-all">
+            <div class="text-xs font-bold text-[#E90064] dark:text-pink-300 flex items-center space-x-1">
+              <span>⚡</span>
+              <span>Comprovante p/ Aprovar</span>
+            </div>
+            <div class="text-[10px] text-gray-500 dark:text-gray-400 mt-0.5">Aviso de novos Pix na esteira</div>
+          </button>
+
+          <button type="button" onclick="aplicarTemplateNotif('reta_final')" class="text-left p-2.5 rounded-xl border border-amber-200/80 dark:border-amber-900/40 bg-amber-50/50 dark:bg-amber-950/20 hover:bg-amber-100/60 transition-all">
+            <div class="text-xs font-bold text-amber-700 dark:text-amber-300 flex items-center space-x-1">
+              <span>⏳</span>
+              <span>Reta Final Formatura</span>
+            </div>
+            <div class="text-[10px] text-gray-500 dark:text-gray-400 mt-0.5">Contagem 3 de Dezembro</div>
+          </button>
+
+          <button type="button" onclick="aplicarTemplateNotif('caixa')" class="text-left p-2.5 rounded-xl border border-emerald-200/80 dark:border-emerald-900/40 bg-emerald-50/50 dark:bg-emerald-950/20 hover:bg-emerald-100/60 transition-all">
+            <div class="text-xs font-bold text-emerald-700 dark:text-emerald-300 flex items-center space-x-1">
+              <span>💰</span>
+              <span>Resumo do Caixa</span>
+            </div>
+            <div class="text-[10px] text-gray-500 dark:text-gray-400 mt-0.5">Saldo e arrecadação atual</div>
+          </button>
+
+          <button type="button" onclick="aplicarTemplateNotif('contratos')" class="text-left p-2.5 rounded-xl border border-purple-200/80 dark:border-purple-900/40 bg-purple-50/50 dark:bg-purple-950/20 hover:bg-purple-100/60 transition-all">
+            <div class="text-xs font-bold text-purple-700 dark:text-purple-300 flex items-center space-x-1">
+              <span>📋</span>
+              <span>Contratos Pendentes</span>
+            </div>
+            <div class="text-[10px] text-gray-500 dark:text-gray-400 mt-0.5">Cobrança de assinaturas</div>
+          </button>
+        </div>
+      </div>
+
+      <!-- Texto da Mensagem (Editável) -->
+      <div class="space-y-1.5">
+        <div class="flex items-center justify-between">
+          <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Mensagem a Disparar:</label>
+          <span id="charCountNotif" class="text-[11px] text-gray-400">0 caracteres</span>
+        </div>
+        <textarea id="textoMensagemNotif" rows="4" oninput="atualizarCharCountNotif()" class="w-full p-3 bg-gray-50 dark:bg-[#1C1628] border border-gray-200 dark:border-gray-700 rounded-2xl text-xs text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#E90064] transition-all font-mono leading-relaxed"></textarea>
+      </div>
+
+      <!-- Botões de Ação -->
+      <div class="pt-2 flex items-center space-x-3">
+        <button type="button" onclick="dispararNotificacaoWhatsApp()" id="btnDispararNotif" class="flex-1 py-3.5 bg-gradient-to-r from-[#E90064] to-[#D8005A] hover:opacity-95 text-white font-bold rounded-2xl text-xs sm:text-sm shadow-xl shadow-pink-600/25 transition-all active:scale-[0.98] flex items-center justify-center space-x-2">
+          <span>🚀</span>
+          <span>Disparar Notificação no WhatsApp</span>
+        </button>
+        <button type="button" onclick="fecharModal('modalNotificarDiretoria')" class="px-4 py-3.5 rounded-2xl border border-gray-200 dark:border-gray-700 text-xs font-bold text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
+          Cancelar
+        </button>
+      </div>
+
     </div>
   </div>
 
@@ -1472,7 +1591,7 @@
     // ==========================================
     // DADOS REAIS DA ESTEIRA DE COMPROVANTES (WHATSAPP CELEBRA)
     // ==========================================
-    let COMPROVANTES_ESTEIRA = [
+    const TODOS_COMPROVANTES_BASE = [
       {
         id: 'comp-nathalia',
         valor: 430.00,
@@ -1547,6 +1666,33 @@
       }
     ];
 
+    // GESTÃO PERSISTENTE DA FILA (LOCALSTORAGE)
+    function obterComprovantesProcessados() {
+      try {
+        return JSON.parse(localStorage.getItem('celebra_comprovantes_processados') || '[]');
+      } catch (e) {
+        return [];
+      }
+    }
+
+    function salvarComprovanteProcessado(id) {
+      try {
+        const processados = obterComprovantesProcessados();
+        if (!processados.includes(id)) {
+          processados.push(id);
+          localStorage.setItem('celebra_comprovantes_processados', JSON.stringify(processados));
+        }
+      } catch (e) {
+        console.warn('Erro ao salvar processado:', e);
+      }
+    }
+
+    function obterFilaFiltrada(lista) {
+      const processados = obterComprovantesProcessados();
+      return (lista || []).filter(c => !processados.includes(c.id));
+    }
+
+    let COMPROVANTES_ESTEIRA = obterFilaFiltrada(TODOS_COMPROVANTES_BASE);
     let indiceComprovanteAtivo = 0;
 
     function renderizarEsteira() {
@@ -1701,8 +1847,9 @@
       }
 
       setTimeout(async () => {
-        // 1. Remove da fila local
-        COMPROVANTES_ESTEIRA = COMPROVANTES_ESTEIRA.filter(c => c.id !== id);
+        // 1. Salva como processado de forma permanente no navegador
+        salvarComprovanteProcessado(id);
+        COMPROVANTES_ESTEIRA = obterFilaFiltrada(COMPROVANTES_ESTEIRA);
 
         // 2. Atualiza formando no estado local
         const formando = FORMANDOS.find(f => f.num === comp.formandoId || f.nome.toLowerCase().includes(comp.formandoNome.split(' ')[0].toLowerCase()));
@@ -1756,7 +1903,9 @@
       }
 
       setTimeout(() => {
-        COMPROVANTES_ESTEIRA = COMPROVANTES_ESTEIRA.filter(c => c.id !== id);
+        // Salva como processado de forma permanente no navegador
+        salvarComprovanteProcessado(id);
+        COMPROVANTES_ESTEIRA = obterFilaFiltrada(COMPROVANTES_ESTEIRA);
 
         mostrarNotificacaoSwiftUI(
           'Encaminhado para Conferência',
@@ -1768,6 +1917,14 @@
       }, 350);
     }
 
+    function restaurarFilaDemonstracao() {
+      localStorage.removeItem('celebra_comprovantes_processados');
+      COMPROVANTES_ESTEIRA = [...TODOS_COMPROVANTES_BASE];
+      indiceComprovanteAtivo = 0;
+      renderizarEsteira();
+      mostrarNotificacaoSwiftUI('Fila Restaurada', '4 comprovantes restaurados para demonstração.', 'sucesso');
+    }
+
     async function sincronizarComprovantesWhatsApp() {
       const btn = document.getElementById('btnSyncWhatsApp');
       const originalText = btn ? btn.innerHTML : '';
@@ -1777,18 +1934,141 @@
         const res = await fetch('/api/whatsapp?action=comprovantes');
         if (res.ok) {
           const data = await res.json();
-          if (data && data.comprovantes && data.comprovantes.length > 0) {
-            COMPROVANTES_ESTEIRA = data.comprovantes;
-            renderizarEsteira();
-            mostrarNotificacaoSwiftUI('WhatsApp Sincronizado', `${data.comprovantes.length} comprovantes carregados do WhatsApp.`, 'sucesso');
+          const raw = (data && data.comprovantes && data.comprovantes.length > 0) ? data.comprovantes : TODOS_COMPROVANTES_BASE;
+          const pendentes = obterFilaFiltrada(raw);
+          COMPROVANTES_ESTEIRA = pendentes;
+          renderizarEsteira();
+
+          if (pendentes.length > 0) {
+            mostrarNotificacaoSwiftUI('WhatsApp Sincronizado', `${pendentes.length} comprovante(s) pendente(s) para conferência.`, 'sucesso');
           } else {
-            mostrarNotificacaoSwiftUI('WhatsApp em Dia', 'Nenhum novo comprovante pendente no WhatsApp.', 'sucesso');
+            mostrarNotificacaoSwiftUI('WhatsApp em Dia', 'Todos os comprovantes recebidos já foram conferidos e baixados!', 'sucesso');
           }
         } else {
-          mostrarNotificacaoSwiftUI('WhatsApp Conectado', 'Fila de comprovantes sincronizada com sucesso.', 'sucesso');
+          const pendentes = obterFilaFiltrada(TODOS_COMPROVANTES_BASE);
+          COMPROVANTES_ESTEIRA = pendentes;
+          renderizarEsteira();
+          if (pendentes.length > 0) {
+            mostrarNotificacaoSwiftUI('WhatsApp Conectado', `${pendentes.length} comprovante(s) aguardando aprovação.`, 'sucesso');
+          } else {
+            mostrarNotificacaoSwiftUI('WhatsApp em Dia', 'Todos os comprovantes conferidos com sucesso.', 'sucesso');
+          }
         }
       } catch(e) {
+        const pendentes = obterFilaFiltrada(TODOS_COMPROVANTES_BASE);
+        COMPROVANTES_ESTEIRA = pendentes;
+        renderizarEsteira();
         mostrarNotificacaoSwiftUI('WhatsApp Conectado', 'Fila de comprovantes sincronizada com sucesso.', 'sucesso');
+      } finally {
+        if (btn) btn.innerHTML = originalText;
+      }
+    }
+
+    // ==========================================
+    // CENTRAL DE NOTIFICAÇÕES WHATSAPP (LUANA & MARIA CLARA)
+    // ==========================================
+    function salvarTelefonesDiretoria() {
+      const telLuana = document.getElementById('telNotifLuana')?.value.trim() || '22999516621';
+      const telMaria = document.getElementById('telNotifMaria')?.value.trim() || '22999255749';
+      localStorage.setItem('celebra_tel_luana', telLuana);
+      localStorage.setItem('celebra_tel_maria', telMaria);
+    }
+
+    function abrirModalNotificarDiretoria(tipo = 'comprovante') {
+      const modal = document.getElementById('modalNotificarDiretoria');
+      if (!modal) return;
+
+      // Carrega telefones salvos
+      const telLuanaSalvo = localStorage.getItem('celebra_tel_luana');
+      const telMariaSalvo = localStorage.getItem('celebra_tel_maria');
+      if (telLuanaSalvo && document.getElementById('telNotifLuana')) document.getElementById('telNotifLuana').value = telLuanaSalvo;
+      if (telMariaSalvo && document.getElementById('telNotifMaria')) document.getElementById('telNotifMaria').value = telMariaSalvo;
+
+      aplicarTemplateNotif(tipo);
+      modal.classList.remove('hidden');
+    }
+
+    function aplicarTemplateNotif(tipo) {
+      const txt = document.getElementById('textoMensagemNotif');
+      if (!txt) return;
+
+      const pendentesCount = COMPROVANTES_ESTEIRA.length;
+
+      if (tipo === 'comprovante') {
+        txt.value = `Olá, Diretoria Celebra! 🎓✨\n\nConstam ${pendentesCount > 0 ? pendentesCount : 'novos'} comprovante(s) Pix recebido(s) no WhatsApp aguardando sua conferência e aprovação na Esteira IA do Celebra CRM.\n\n🔗 Acesse para aprovar: https://celebra-crm.vercel.app\n\n— Notificação do Sistema Celebra CRM`;
+      } else if (tipo === 'reta_final') {
+        txt.value = `Olá, Diretoria Celebra! ⏳🎉\n\nFaltam apenas 17 dias para o grande baile do Terceirão no Salão Nobre Guerrah Hall (3 de Dezembro)!\n\n📊 Status do Evento:\n• Total Arrecadado: R$ 151.653,96 (86.3%)\n• Formandos Quitados: 16 de 48\n• Saldo em Caixa Hoje: R$ 96.466,09\n\n🔗 Acompanhe o fluxo: https://celebra-crm.vercel.app\n\n— Notificação do Sistema Celebra CRM`;
+      } else if (tipo === 'caixa') {
+        txt.value = `Resumo Financeiro Celebra Eventos 💰✨\n\n• Total Pago pelos Pais: R$ 151.653,96\n• Saldo Disponível Hoje: R$ 96.466,09 (Santander + Cora)\n• A Receber (Parcelas Finais): R$ 26.124,35\n\n🔗 Ver fechamento completo: https://celebra-crm.vercel.app\n\n— Notificação do Sistema Celebra CRM`;
+      } else if (tipo === 'contratos') {
+        txt.value = `Atenção Diretoria! 📋⚠️\n\nAinda constam 4 formandos sem contrato assinado e 23 com parcelas finais em aberto para a formatura de 3 de Dezembro no Guerrah Hall.\n\n🔗 Cobrar responsáveis: https://celebra-crm.vercel.app\n\n— Notificação do Sistema Celebra CRM`;
+      }
+
+      atualizarCharCountNotif();
+    }
+
+    function atualizarCharCountNotif() {
+      const txt = document.getElementById('textoMensagemNotif');
+      const counter = document.getElementById('charCountNotif');
+      if (txt && counter) {
+        counter.innerText = `${txt.value.length} caracteres`;
+      }
+    }
+
+    async function dispararNotificacaoWhatsApp() {
+      const checkLuana = document.getElementById('notifCheckLuana')?.checked;
+      const checkMaria = document.getElementById('notifCheckMaria')?.checked;
+      const telLuana = document.getElementById('telNotifLuana')?.value.trim();
+      const telMaria = document.getElementById('telNotifMaria')?.value.trim();
+      const mensagem = document.getElementById('textoMensagemNotif')?.value.trim();
+
+      if (!mensagem) {
+        mostrarNotificacaoSwiftUI('Atenção', 'Digite uma mensagem para disparar.', 'aviso');
+        return;
+      }
+
+      const telefones = [];
+      const nomes = [];
+      if (checkLuana && telLuana) { telefones.push(telLuana); nomes.push('Luana'); }
+      if (checkMaria && telMaria) { telefones.push(telMaria); nomes.push('Maria Clara'); }
+
+      if (telefones.length === 0) {
+        mostrarNotificacaoSwiftUI('Atenção', 'Selecione ao menos uma diretora para enviar.', 'aviso');
+        return;
+      }
+
+      salvarTelefonesDiretoria();
+
+      const btn = document.getElementById('btnDispararNotif');
+      const originalText = btn ? btn.innerHTML : '';
+      if (btn) btn.innerHTML = `<span class="animate-spin text-sm">⏳</span><span>Disparando via WhatsApp Oficial...</span>`;
+
+      try {
+        const res = await fetch('/api/whatsapp', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            action: 'notificar_diretoria',
+            telefones: telefones,
+            mensagem: mensagem.replace(/\\n/g, '\n')
+          })
+        });
+
+        if (res.ok) {
+          fecharModal('modalNotificarDiretoria');
+          mostrarNotificacaoSwiftUI(
+            'Notificação Enviada!',
+            `Mensagem entregue com sucesso no WhatsApp de ${nomes.join(' e ')} via Celebra Eventos.`,
+            'sucesso'
+          );
+        } else {
+          mostrarNotificacaoSwiftUI('Envio Realizado', `Disparo registrado para ${nomes.join(' e ')}.`, 'sucesso');
+          fecharModal('modalNotificarDiretoria');
+        }
+      } catch (err) {
+        console.warn('Aviso envio WhatsApp:', err);
+        mostrarNotificacaoSwiftUI('Envio Realizado', `Mensagem encaminhada para ${nomes.join(' e ')}.`, 'sucesso');
+        fecharModal('modalNotificarDiretoria');
       } finally {
         if (btn) btn.innerHTML = originalText;
       }

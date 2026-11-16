@@ -111,6 +111,34 @@ export default async function handler(req, res) {
 
   try {
     const body = req.body || {};
+
+    // 0. AÇÃO DO WEB APP: NOTIFICAR DIRETORIA VIA WHATSAPP
+    if (body.action === 'notificar_diretoria') {
+      const telefones = body.telefones || [];
+      const mensagem = body.mensagem || '';
+
+      if (!mensagem || telefones.length === 0) {
+        return res.status(400).json({ error: 'Telefone e mensagem são obrigatórios.' });
+      }
+
+      console.log(`📢 [Notificar Diretoria] Disparando para ${telefones.length} contatos:`, telefones);
+      const resultados = [];
+      for (const tel of telefones) {
+        const cleanTel = tel.replace(/\D/g, '');
+        if (cleanTel.length >= 8) {
+          const recipient = cleanTel.includes('@') ? cleanTel : `${cleanTel}@s.whatsapp.net`;
+          try {
+            await enviarWhatsApp(recipient, mensagem);
+            resultados.push({ tel: cleanTel, status: 'enviado' });
+          } catch(e) {
+            console.error(`Erro envio para ${cleanTel}:`, e);
+            resultados.push({ tel: cleanTel, status: 'erro', erro: e.message });
+          }
+        }
+      }
+
+      return res.status(200).json({ success: true, count: resultados.length, resultados });
+    }
     const event = body.event || body.type;
 
     if (event !== 'messages.upsert' && event !== 'MESSAGES_UPSERT') {

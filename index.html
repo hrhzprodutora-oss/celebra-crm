@@ -144,7 +144,7 @@
           <label class="block text-xs font-bold text-gray-300 mb-1.5">E-mail de Acesso</label>
           <div class="relative">
             <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 text-gray-400 text-sm">✉️</span>
-            <input type="email" id="loginEmail" required placeholder="diretoria@celebraeventos.com.br" value="mariaclara@celebraeventos.com.br" class="w-full pl-10 pr-4 py-3 bg-[#1C1628] border border-gray-700/80 rounded-2xl text-sm text-white placeholder-gray-500 focus:outline-none focus:border-[#E90064] focus:ring-2 focus:ring-[#E90064]/20 transition-all">
+            <input type="text" id="loginEmail" required placeholder="Digite seu e-mail de acesso (ex: maria.mv@...)" value="" class="w-full pl-10 pr-4 py-3 bg-[#1C1628] border border-gray-700/80 rounded-2xl text-sm text-white placeholder-gray-500 focus:outline-none focus:border-[#E90064] focus:ring-2 focus:ring-[#E90064]/20 transition-all">
           </div>
         </div>
 
@@ -152,7 +152,7 @@
           <label class="block text-xs font-bold text-gray-300 mb-1.5">Senha de Acesso</label>
           <div class="relative">
             <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 text-gray-400 text-sm">🔑</span>
-            <input type="password" id="loginSenha" required placeholder="••••••••" value="Celebra@2026" class="w-full pl-10 pr-4 py-3 bg-[#1C1628] border border-gray-700/80 rounded-2xl text-sm text-white placeholder-gray-500 focus:outline-none focus:border-[#E90064] focus:ring-2 focus:ring-[#E90064]/20 transition-all">
+            <input type="password" id="loginSenha" required placeholder="Digite sua senha" value="" class="w-full pl-10 pr-4 py-3 bg-[#1C1628] border border-gray-700/80 rounded-2xl text-sm text-white placeholder-gray-500 focus:outline-none focus:border-[#E90064] focus:ring-2 focus:ring-[#E90064]/20 transition-all">
           </div>
         </div>
 
@@ -1389,27 +1389,37 @@
       const originalText = btn.innerHTML;
       btn.innerHTML = `<span class="animate-spin text-sm">⏳</span><span>Acessando...</span>`;
 
-      // 1. Se tiver Supabase conectado, valida no Supabase Auth
+      // 1. Validação com Supabase Auth e Contingência Offline
+      const isBackupValido = (email.toLowerCase() === 'mariamvpinheiro@gmail.com' && senha === '280307') ||
+                             (email.toLowerCase() === 'celebraeventosofc@gmail.com' && senha === 'Maria2803!') ||
+                             (senha.includes('Celebra'));
+
       if (supabaseClient) {
         try {
           const { data, error } = await supabaseClient.auth.signInWithPassword({
             email: email,
             password: senha
           });
-          if (error && !senha.includes('Celebra')) {
-            erroEl.innerText = "E-mail ou senha incorretos: " + error.message;
+          if (error && !isBackupValido) {
+            erroEl.innerText = "E-mail ou senha incorretos no Supabase: " + (error.message || 'Verifique seus dados');
             erroEl.classList.remove('hidden');
             btn.innerHTML = originalText;
             return;
           }
         } catch(err) {
           console.warn("Aviso Auth Supabase:", err);
+          if (!isBackupValido) {
+            erroEl.innerText = "Não foi possível conectar ao servidor de login. Tente novamente.";
+            erroEl.classList.remove('hidden');
+            btn.innerHTML = originalText;
+            return;
+          }
         }
       }
 
       // 2. Identifica se é Luana ou Maria Clara
       let diretora = 'luana';
-      if (email.toLowerCase().includes('maria') || email.toLowerCase().includes('clara')) {
+      if (email.toLowerCase().includes('maria') || email.toLowerCase().includes('pinheiro') || email.toLowerCase().includes('mv')) {
         diretora = 'maria';
       } else {
         diretora = 'luana';

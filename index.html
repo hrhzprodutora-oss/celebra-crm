@@ -204,10 +204,11 @@
         <span>Reta Final: <strong id="contadorDiasTop" class="text-[#E90064]">17 dias</strong></span>
       </div>
 
-      <!-- BOTÃO NOTIFICAR DIRETORIA WHATSAPP -->
-      <button onclick="abrirModalNotificarDiretoria()" title="Enviar Notificação WhatsApp para Luana e Maria Clara" class="flex items-center space-x-1.5 px-3 py-1.5 rounded-xl bg-pink-50 dark:bg-pink-950/40 text-[#E90064] dark:text-pink-300 hover:bg-pink-100 dark:hover:bg-pink-900/40 border border-pink-200/60 dark:border-pink-900/40 text-xs font-bold transition-all shadow-xs active:scale-95">
-        <span>📲</span>
-        <span class="hidden sm:inline">Notificar Diretoria</span>
+      <!-- BOTÃO NOTIFICAÇÕES NATIVAS DE CELULAR (ESTILO PIX / APP STORE) -->
+      <button onclick="abrirModalNotificacoesNativas()" title="Notificações na Tela de Bloqueio e Barra do Celular" class="flex items-center space-x-1.5 px-3 py-1.5 rounded-xl bg-pink-50 dark:bg-pink-950/40 text-[#E90064] dark:text-pink-300 hover:bg-pink-100 dark:hover:bg-pink-900/40 border border-pink-200/60 dark:border-pink-900/40 text-xs font-bold transition-all shadow-xs active:scale-95 relative">
+        <span class="text-sm">🔔</span>
+        <span class="hidden sm:inline">Notificações no Celular</span>
+        <span id="pontoStatusNotifCelular" class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
       </button>
 
       <!-- BOTÃO MODO ESCURO -->
@@ -858,6 +859,104 @@
   </div>
 
   
+  
+  <!-- MODAL: NOTIFICAÇÕES NATIVAS NA ABA DO CELULAR (ESTILO PIX / IFOOD / BANCO) -->
+  <div id="modalNotificacoesNativas" class="fixed inset-0 bg-black/60 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-white dark:bg-[#15101E] border border-gray-200 dark:border-gray-800 rounded-3xl max-w-lg w-full p-6 sm:p-7 shadow-2xl relative space-y-5" style="animation: swiftCardSpring 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;">
+      
+      <!-- Cabeçalho -->
+      <div class="flex items-start justify-between">
+        <div class="flex items-center space-x-3">
+          <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-[#E90064] to-[#FF5E8E] text-white flex items-center justify-center text-lg font-bold shadow-md shadow-pink-600/25">
+            🔔
+          </div>
+          <div>
+            <h3 class="text-base font-black text-gray-900 dark:text-white">Notificações na Aba do Celular</h3>
+            <p class="text-xs text-gray-500 dark:text-gray-400">Alertas na tela de bloqueio e central do iPhone e Android</p>
+          </div>
+        </div>
+        <button onclick="fecharModal('modalNotificacoesNativas')" class="text-gray-400 hover:text-gray-600 dark:hover:text-white font-bold text-xl p-1">&times;</button>
+      </div>
+
+      <!-- Status da Permissão -->
+      <div id="boxStatusPermissaoNotif" class="p-4 rounded-2xl border transition-all flex items-center justify-between">
+        <div class="flex items-center space-x-3">
+          <div id="iconeStatusPermissao" class="w-8 h-8 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-bold text-sm">✓</div>
+          <div>
+            <div id="tituloStatusPermissao" class="text-xs font-bold text-gray-900 dark:text-white">Alertas Ativos no seu Aparelho</div>
+            <div id="descStatusPermissao" class="text-[11px] text-gray-500 dark:text-gray-400">O celular já tem permissão para receber avisos.</div>
+          </div>
+        </div>
+        <button onclick="solicitarPermissaoNativa()" id="btnAtivarNotifCelular" class="px-3.5 py-2 rounded-xl bg-gradient-to-r from-[#E90064] to-[#D8005A] text-white text-xs font-bold shadow-sm hover:opacity-95 transition-all hidden">
+          Ativar Agora
+        </button>
+      </div>
+
+      <!-- Como Funciona no iPhone e Android -->
+      <div class="bg-gray-50 dark:bg-[#1C1628] rounded-2xl p-4 border border-gray-100 dark:border-gray-800 space-y-2">
+        <div class="text-[11px] font-bold text-[#E90064] uppercase tracking-wider flex items-center space-x-1.5">
+          <span>📱</span>
+          <span>Como receber na Tela de Bloqueio:</span>
+        </div>
+        <ul class="text-xs text-gray-600 dark:text-gray-300 space-y-1.5 pl-1 leading-relaxed">
+          <li>• <strong>No iPhone (iOS):</strong> Abra no Safari, toque no ícone de <strong>Compartilhar</strong> (quadrado com seta) ➜ <strong>"Adicionar à Tela de Início"</strong>. Abra pelo ícone e permita notificações.</li>
+          <li>• <strong>No Android:</strong> Ao tocar em <strong>"Ativar Agora"</strong> ou acessar o app, toque em <strong>"Permitir"</strong> no aviso do Chrome.</li>
+        </ul>
+      </div>
+
+      <!-- Testes de Alertas em Tempo Real (Estilo Pix / Banco) -->
+      <div class="space-y-2">
+        <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Testar no seu Celular Agora:</label>
+        
+        <div class="grid grid-cols-1 gap-2">
+          <!-- Alerta 1: Pix Recebido -->
+          <button type="button" onclick="dispararExemploNotificacao('pix')" class="w-full text-left p-3 rounded-2xl border border-gray-200 dark:border-gray-700/80 hover:border-[#E90064] hover:bg-pink-50/40 dark:hover:bg-pink-950/20 transition-all flex items-center justify-between group">
+            <div class="flex items-center space-x-3">
+              <span class="text-xl">💳</span>
+              <div>
+                <div class="text-xs font-bold text-gray-900 dark:text-white group-hover:text-[#E90064]">Alerta de Pix Recebido</div>
+                <div class="text-[11px] text-gray-500 dark:text-gray-400">"Novo Pix: R$ 430,00 recebido via WhatsApp (Nathália Ramos)"</div>
+              </div>
+            </div>
+            <span class="text-xs font-bold text-[#E90064] shrink-0">Disparar ➜</span>
+          </button>
+
+          <!-- Alerta 2: Reta Final Formatura -->
+          <button type="button" onclick="dispararExemploNotificacao('reta_final')" class="w-full text-left p-3 rounded-2xl border border-gray-200 dark:border-gray-700/80 hover:border-amber-500 hover:bg-amber-50/40 dark:hover:bg-amber-950/20 transition-all flex items-center justify-between group">
+            <div class="flex items-center space-x-3">
+              <span class="text-xl">⏳</span>
+              <div>
+                <div class="text-xs font-bold text-gray-900 dark:text-white group-hover:text-amber-500">Alerta de Reta Final do Baile</div>
+                <div class="text-[11px] text-gray-500 dark:text-gray-400">"Faltam 17 dias para a formatura no Guerrah Hall!"</div>
+              </div>
+            </div>
+            <span class="text-xs font-bold text-amber-500 shrink-0">Disparar ➜</span>
+          </button>
+
+          <!-- Alerta 3: Comprovante para Aprovar -->
+          <button type="button" onclick="dispararExemploNotificacao('comprovante')" class="w-full text-left p-3 rounded-2xl border border-gray-200 dark:border-gray-700/80 hover:border-emerald-500 hover:bg-emerald-50/40 dark:hover:bg-emerald-950/20 transition-all flex items-center justify-between group">
+            <div class="flex items-center space-x-3">
+              <span class="text-xl">⚡</span>
+              <div>
+                <div class="text-xs font-bold text-gray-900 dark:text-white group-hover:text-emerald-500">Comprovante para Aprovação</div>
+                <div class="text-[11px] text-gray-500 dark:text-gray-400">"Comprovante Pix aguardando sua conferência no CRM"</div>
+              </div>
+            </div>
+            <span class="text-xs font-bold text-emerald-500 shrink-0">Disparar ➜</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Fechar -->
+      <div class="pt-2">
+        <button type="button" onclick="fecharModal('modalNotificacoesNativas')" class="w-full py-3 rounded-2xl bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 font-bold text-xs hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
+          Fechar
+        </button>
+      </div>
+
+    </div>
+  </div>
+
   <!-- MODAL: NOTIFICAÇÃO WHATSAPP PARA A DIRETORIA -->
   <div id="modalNotificarDiretoria" class="fixed inset-0 bg-black/60 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden">
     <div class="bg-white dark:bg-[#15101E] border border-gray-200 dark:border-gray-800 rounded-3xl max-w-lg w-full p-6 sm:p-7 shadow-2xl relative space-y-5" style="animation: swiftCardSpring 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;">
@@ -1882,11 +1981,17 @@
           }
         }
 
-        // 4. Notificação fluida SwiftUI
+        // 4. Notificação fluida SwiftUI + Notificação Nativa na Barra do Celular
         mostrarNotificacaoSwiftUI(
           'Comprovante Aprovado!',
           `R$ ${comp.valor.toFixed(2).replace('.', ',')} de ${comp.formandoNome} lançado com sucesso no CRM.`,
           'sucesso'
+        );
+
+        dispararNotificacaoNativa(
+          'Celebra Eventos • Baixa Realizada ✅',
+          `Comprovante de R$ ${comp.valor.toFixed(2).replace('.', ',')} de ${comp.formandoNome} baixado com sucesso no CRM.`,
+          { url: '/?tab=formandos' }
         );
 
         renderizarEsteira();
@@ -2085,7 +2190,155 @@ function selectComprovanteReal(id) {
       mostrarNotificacaoSwiftUI("Exportação Concluída", "Planilha exportada com sucesso em Excel / CSV!", "sucesso");
     }
 
-    document.addEventListener('DOMContentLoaded', () => {
+    
+    // ==========================================
+    // NOTIFICAÇÕES NATIVAS DO CELULAR (TELA DE BLOQUEIO / ABA DO CELULAR)
+    // ==========================================
+    function atualizarStatusNotificacoesUI() {
+      const box = document.getElementById('boxStatusPermissaoNotif');
+      const icone = document.getElementById('iconeStatusPermissao');
+      const titulo = document.getElementById('tituloStatusPermissao');
+      const desc = document.getElementById('descStatusPermissao');
+      const btnAtivar = document.getElementById('btnAtivarNotifCelular');
+      const ponto = document.getElementById('pontoStatusNotifCelular');
+
+      if (!('Notification' in window)) {
+        if (titulo) titulo.innerText = "Navegador sem Suporte Nativo";
+        if (desc) desc.innerText = "Use o Safari no iPhone ou Chrome no Android.";
+        return;
+      }
+
+      if (Notification.permission === 'granted') {
+        if (box) {
+          box.className = "p-4 rounded-2xl border border-emerald-500/30 bg-emerald-50/50 dark:bg-emerald-950/20 flex items-center justify-between";
+        }
+        if (icone) {
+          icone.className = "w-8 h-8 rounded-full bg-emerald-500/20 text-emerald-500 flex items-center justify-center font-bold text-sm";
+          icone.innerText = "✓";
+        }
+        if (titulo) titulo.innerText = "Alertas Nativos Ativados no Celular 🟢";
+        if (desc) desc.innerText = "Você receberá avisos na tela de bloqueio e na central de notificações.";
+        if (btnAtivar) btnAtivar.classList.add('hidden');
+        if (ponto) ponto.className = "w-2 h-2 rounded-full bg-emerald-500 animate-pulse";
+      } else {
+        if (box) {
+          box.className = "p-4 rounded-2xl border border-amber-500/30 bg-amber-50/50 dark:bg-amber-950/20 flex items-center justify-between";
+        }
+        if (icone) {
+          icone.className = "w-8 h-8 rounded-full bg-amber-500/20 text-amber-500 flex items-center justify-center font-bold text-sm";
+          icone.innerText = "!";
+        }
+        if (titulo) titulo.innerText = "Alertas Pendentes de Ativação 🟡";
+        if (desc) desc.innerText = "Toque em Ativar Agora para autorizar notificações.";
+        if (btnAtivar) btnAtivar.classList.remove('hidden');
+        if (ponto) ponto.className = "w-2 h-2 rounded-full bg-amber-400";
+      }
+    }
+
+    async function solicitarPermissaoNativa() {
+      if (!('Notification' in window)) {
+        mostrarNotificacaoSwiftUI('Não Suportado', 'Notificações nativas não são suportadas neste navegador.', 'aviso');
+        return;
+      }
+
+      try {
+        const permissao = await Notification.requestPermission();
+        atualizarStatusNotificacoesUI();
+
+        if (permissao === 'granted') {
+          mostrarNotificacaoSwiftUI('Notificações Ativadas!', 'Alertas habilitados na aba do seu celular.', 'sucesso');
+          dispararNotificacaoNativa(
+            'Celebra Eventos • Notificações Ativadas! 💳',
+            'Pronto! Você receberá avisos de Pix, quitações e prazos diretamente na tela do seu aparelho.',
+            { url: '/' }
+          );
+        } else {
+          mostrarNotificacaoSwiftUI('Atenção', 'Permissão de notificação negada no navegador.', 'aviso');
+        }
+      } catch(err) {
+        console.warn('Erro ao solicitar permissão:', err);
+      }
+    }
+
+    function dispararNotificacaoNativa(titulo, corpo, dados = {}) {
+      if (!('Notification' in window) || Notification.permission !== 'granted') {
+        solicitarPermissaoNativa();
+        return;
+      }
+
+      const options = {
+        body: corpo,
+        icon: '/favicon.png',
+        badge: '/favicon.png',
+        vibrate: [200, 100, 200], // Vibração idêntica à de Pix / Banco
+        tag: 'celebra-' + Date.now(),
+        renotify: true,
+        data: dados
+      };
+
+      if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
+        navigator.serviceWorker.ready.then((reg) => {
+          reg.showNotification(titulo, options);
+        }).catch(() => {
+          try { new Notification(titulo, options); } catch(e){}
+        });
+      } else {
+        try {
+          new Notification(titulo, options);
+        } catch(e) {
+          console.warn('Fallback Notif:', e);
+        }
+      }
+    }
+
+    function dispararExemploNotificacao(tipo) {
+      if (!('Notification' in window) || Notification.permission !== 'granted') {
+        solicitarPermissaoNativa();
+        return;
+      }
+
+      if (tipo === 'pix') {
+        dispararNotificacaoNativa(
+          'Celebra Eventos • Novo Pix Recebido! 💳',
+          'R$ 430,00 recebido via WhatsApp de Camile Ramos (Nathália Ramos #43). Toque para conferir.',
+          { url: '/?tab=comprovantes' }
+        );
+      } else if (tipo === 'reta_final') {
+        dispararNotificacaoNativa(
+          'Celebra Eventos • Reta Final ⏳',
+          'Faltam apenas 17 dias para a formatura no Salão Nobre Guerrah Hall! R$ 151.653 arrecadados.',
+          { url: '/' }
+        );
+      } else if (tipo === 'comprovante') {
+        dispararNotificacaoNativa(
+          'Celebra Eventos • Comprovante para Aprovar ⚡',
+          'Novo comprovante Pix aguardando sua aprovação na Esteira IA do Celebra CRM.',
+          { url: '/?tab=comprovantes' }
+        );
+      }
+
+      mostrarNotificacaoSwiftUI('Alerta Disparado!', 'Verifique a aba / tela de bloqueio do seu celular!', 'sucesso');
+    }
+
+    function abrirModalNotificacoesNativas() {
+      atualizarStatusNotificacoesUI();
+      const modal = document.getElementById('modalNotificacoesNativas');
+      if (modal) modal.classList.remove('hidden');
+    }
+
+    // REGISTRO DO SERVICE WORKER PWA
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js').then((reg) => {
+          console.log('✅ Service Worker Celebra ativo:', reg.scope);
+          atualizarStatusNotificacoesUI();
+        }).catch((err) => {
+          console.warn('SW:', err);
+        });
+      });
+    }
+
+document.addEventListener('DOMContentLoaded', () => {
       const temaSalvo = localStorage.getItem('celebra_theme');
       if (temaSalvo === 'dark') {
         document.documentElement.classList.add('dark');

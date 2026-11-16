@@ -1,0 +1,25 @@
+{
+  "name": "Celebra Eventos CRM",
+  "short_name": "Celebra CRM",
+  "description": "Sistema Integrado de Gestão Financeira de Formaturas da Celebra Eventos",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#140E1B",
+  "theme_color": "#E90064",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/favicon.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/favicon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

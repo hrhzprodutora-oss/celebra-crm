@@ -1460,12 +1460,23 @@
     }
 
     function concluirLoginSucesso(diretora, email) {
-      localStorage.setItem('celebra_sessao_ativa', 'true');
-      localStorage.setItem('celebra_usuario_logado', diretora);
-      localStorage.setItem('celebra_email_logado', email);
+      try {
+        localStorage.setItem('celebra_sessao_ativa', 'true');
+        localStorage.setItem('celebra_usuario_logado', diretora);
+        localStorage.setItem('celebra_email_logado', email);
+      } catch(e) {}
 
-      selecionarDiretora(diretora);
+      try {
+        selecionarDiretora(diretora);
+      } catch(e) {
+        console.warn('Erro ao selecionar diretora:', e);
+      }
 
+      // 1. Revela o painel principal imediatamente
+      const app = document.getElementById('appPrincipal');
+      if (app) app.classList.remove('hidden');
+
+      // 2. Anima e oculta a tela de login
       const card = document.getElementById('cardLoginBox');
       if (card) {
         card.style.transform = 'translateY(-30px) scale(0.96)';
@@ -1478,14 +1489,13 @@
         tela.style.opacity = '0';
         setTimeout(() => {
           tela.classList.add('hidden');
-          tela.style.opacity = '1';
+          tela.style.display = 'none';
         }, 250);
       }
 
-      const app = document.getElementById('appPrincipal');
-      if (app) app.classList.remove('hidden');
-
-      mostrarNotificacaoSwiftUI('Bem-vinda, ' + (diretora === 'luana' ? 'Luana' : 'Maria Clara'), 'Painel da Celebra Eventos pronto.', 'sucesso');
+      try {
+        mostrarNotificacaoSwiftUI('Bem-vinda, ' + (diretora === 'luana' ? 'Luana' : 'Maria Clara'), 'Painel da Celebra Eventos pronto.', 'sucesso');
+      } catch(e) {}
     }
 
     function loginRapido(diretora) {
@@ -1614,17 +1624,24 @@
       const initialsEl = document.getElementById('avatarInitials');
       const checkL = document.getElementById('checkLuana');
       const checkM = document.getElementById('checkMaria');
+      const dNome = document.getElementById('drawerNomeDiretora');
+      const dInit = document.getElementById('drawerAvatarInitials');
 
-      if (tipo === 'luana') {
-        nomeEl.innerText = "Luana Celebra";
-        initialsEl.innerText = "L";
-        checkL.classList.remove('hidden');
-        checkM.classList.add('hidden');
-      } else {
-        nomeEl.innerText = "Maria Clara Viana";
-        initialsEl.innerText = "M";
-        checkL.classList.add('hidden');
-        checkM.classList.remove('hidden');
+      const nome = (tipo === 'luana') ? "Luana Celebra" : "Maria Clara Viana";
+      const initial = (tipo === 'luana') ? "L" : "M";
+
+      if (nomeEl) nomeEl.innerText = nome;
+      if (initialsEl) initialsEl.innerText = initial;
+      if (dNome) dNome.innerText = nome;
+      if (dInit) dInit.innerText = initial;
+
+      if (checkL) {
+        if (tipo === 'luana') checkL.classList.remove('hidden');
+        else checkL.classList.add('hidden');
+      }
+      if (checkM) {
+        if (tipo === 'maria') checkM.classList.remove('hidden');
+        else checkM.classList.add('hidden');
       }
 
       const fotoSalva = localStorage.getItem('celebra_foto_' + tipo);

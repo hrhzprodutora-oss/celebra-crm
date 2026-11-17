@@ -409,9 +409,13 @@ export default async function handler(req, res) {
     }
 
     // -----------------------------------------------------------------
-    // AÇÃO 4: TESTE DRY-RUN DE AUDITORIA (NÃO ALTERA SALDO NEM ENVIA WHATSAPP)
+    // AÇÃO 4: TESTE DRY-RUN DE AUDITORIA (PROTEGIDO POR APIKEY — ZERO EFEITO COLATERAL)
     // -----------------------------------------------------------------
     if (body.action === "testar_auditoria_dryrun") {
+      const reqApiKey = req.headers["apikey"] || req.headers["x-api-key"] || "";
+      if (reqApiKey !== EVOLUTION_API_KEY) {
+        return res.status(401).json({ error: "Não autorizado." });
+      }
       const { base64, mimeType: declaredMime, fileName, textoMensagem, contextoRecente, senderPhone, pushName } = body;
       if (!base64) {
         return res.status(400).json({ error: "base64 é obrigatório para dry-run." });
@@ -1546,11 +1550,15 @@ export function vincularFormandoComSeguranca({
     }
 
     // --- SINAL 3: MENÇÃO EXPLÍCITA DO NOME DO ALUNO NA CONVERSA / DESCRIÇÃO PIX / ARQUIVO ---
-    const tokensAlunoBatidos = p.nomeTokens.filter(t => temToken(tokensExplicito, t));
     const bateuPrimeiroAluno = p.primeiroNome ? temToken(tokensExplicito, p.primeiroNome) : false;
-    const sobrenomesAlunoBatidos = p.sobrenomesAluno.filter(t => temToken(tokensExplicito, t));
+    // Sobrenomes exigem correspondência EXATA (sem Levenshtein, para jamais confundir Azevedo x Azeredo!)
+    const sobrenomesAlunoBatidos = p.sobrenomesAluno.filter(t => tokensExplicito.has(t));
+    const tokensAlunoBatidos = [
+      ...(bateuPrimeiroAluno ? [p.primeiroNome] : []),
+      ...sobrenomesAlunoBatidos
+    ];
     const sobrenomesUnicosAluno = sobrenomesAlunoBatidos.filter(
-      t => (freqTodosTokens.get(t) || 0) === 1 && !SOBRENOMES_MUITO_COMUNS.has(t)
+      t => (freqTodosTokens.get(t) || 0) === 1 && !SOBRENOMES_MUITO_COMUNS.has(t) && !NOMES_PROPRIOS_COMUNS.has(t)
     );
 
     // Quantos formandos compartilham EXATAMENTE o conjunto de tokens que bateu?

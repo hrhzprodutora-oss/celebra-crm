@@ -1005,7 +1005,7 @@
               <span class="text-xl">⏳</span>
               <div>
                 <div class="text-xs font-bold text-gray-900 dark:text-white group-hover:text-amber-500">Alerta de Reta Final do Baile</div>
-                <div class="text-[11px] text-gray-500 dark:text-gray-400">"Faltam 17 dias para a formatura no Guerrah Hall!"</div>
+                <div class="text-[11px] text-gray-500 dark:text-gray-400">"Faltam 17 dias para a formatura do Terceirão Aprovado!"</div>
               </div>
             </div>
             <span class="text-xs font-bold text-amber-500 shrink-0">Disparar ➜</span>
@@ -1061,7 +1061,7 @@
             <input type="checkbox" id="notifCheckLuana" checked class="rounded text-[#E90064] focus:ring-[#E90064]">
             <div class="text-left">
               <div class="text-xs font-bold text-gray-900 dark:text-white">Luana Celebra</div>
-              <input type="text" id="telNotifLuana" value="22999516621" onchange="salvarTelefonesDiretoria()" class="text-[11px] bg-transparent text-gray-500 dark:text-gray-400 border-b border-transparent hover:border-gray-300 focus:border-[#E90064] outline-none w-28 mt-0.5" title="Clique para editar o telefone">
+              <input type="text" id="telNotifLuana" value="22998811410" onchange="salvarTelefonesDiretoria()" class="text-[11px] bg-transparent text-gray-500 dark:text-gray-400 border-b border-transparent hover:border-gray-300 focus:border-[#E90064] outline-none w-28 mt-0.5" title="Clique para editar o telefone">
             </div>
           </label>
 
@@ -1069,7 +1069,7 @@
             <input type="checkbox" id="notifCheckMaria" checked class="rounded text-[#E90064] focus:ring-[#E90064]">
             <div class="text-left">
               <div class="text-xs font-bold text-gray-900 dark:text-white">Maria Clara</div>
-              <input type="text" id="telNotifMaria" value="22999255749" onchange="salvarTelefonesDiretoria()" class="text-[11px] bg-transparent text-gray-500 dark:text-gray-400 border-b border-transparent hover:border-gray-300 focus:border-[#E90064] outline-none w-28 mt-0.5" title="Clique para editar o telefone">
+              <input type="text" id="telNotifMaria" value="22999516621" onchange="salvarTelefonesDiretoria()" class="text-[11px] bg-transparent text-gray-500 dark:text-gray-400 border-b border-transparent hover:border-gray-300 focus:border-[#E90064] outline-none w-28 mt-0.5" title="Clique para editar o telefone">
             </div>
           </label>
         </div>
@@ -1500,7 +1500,9 @@
       if (app) app.classList.remove('hidden');
 
       sincronizarComSupabase();
-      sincronizarComprovantesWhatsApp();
+      sincronizarComprovantesWhatsApp({ silencioso: true });
+      aplicarAbaDaUrl();
+      iniciarMonitoramentoTempoRealComprovantes();
 
       // 2. Anima e oculta a tela de login
       const card = document.getElementById('cardLoginBox');
@@ -1525,6 +1527,7 @@
     }
 
     function fazerLogout() {
+      pararMonitoramentoTempoRealComprovantes();
       localStorage.removeItem('celebra_sessao_ativa');
       localStorage.removeItem('celebra_usuario_logado');
       localStorage.removeItem('celebra_email_logado');
@@ -1585,7 +1588,9 @@
         }
         if (app) app.classList.remove('hidden');
         await sincronizarComSupabase();
-        sincronizarComprovantesWhatsApp();
+        await sincronizarComprovantesWhatsApp({ silencioso: true });
+        aplicarAbaDaUrl();
+        iniciarMonitoramentoTempoRealComprovantes();
       } else {
         localStorage.removeItem('celebra_sessao_ativa');
         if (tela) {
@@ -2616,39 +2621,138 @@
       mostrarNotificacaoSwiftUI('Fila Restaurada', '4 comprovantes restaurados para demonstração.', 'sucesso');
     }
 
-    async function sincronizarComprovantesWhatsApp() {
+    let canalRealtimeComprovantes = null;
+    let intervaloPollComprovantes = null;
+    const comprovantesNotificadosIds = new Set();
+    let esteiraInicializada = false;
+
+    function aplicarAbaDaUrl() {
+      try {
+        const params = new URLSearchParams(window.location.search);
+        const tab = params.get('tab');
+        if (tab && ['dashboard', 'formandos', 'comprovantes', 'custos', 'contas', 'remarketing'].includes(tab)) {
+          switchTab(tab);
+        }
+      } catch (e) {}
+    }
+
+    function notificarNovoComprovanteNoPainel(comp) {
+      if (!comp || !comp.id || comprovantesNotificadosIds.has(comp.id)) return;
+      comprovantesNotificadosIds.add(comp.id);
+      const valFmt = comp.valor ? formatarMoedaBRL(comp.valor) : 'Valor p/ conferir';
+      const aluno = comp.formandoNome || comp.formando_nome || 'Conferir formando';
+      const pagador = comp.pagador || comp.pagador_nome || comp.remetente_push_name || 'WhatsApp';
+      const ehAuto = comp.statusConferencia === 'aprovado_auto' || comp.status_conferencia === 'aprovado_auto';
+      const titulo = ehAuto
+        ? `✅ Baixa Automática • ${valFmt}`
+        : `📩 Novo Comprovante no WhatsApp • ${valFmt}`;
+      const corpo = `${pagador} → ${aluno}. Toque para conferir no Celebra CRM.`;
+      mostrarNotificacaoSwiftUI(titulo, corpo, ehAuto ? 'sucesso' : 'aviso');
+      dispararNotificacaoNativa(titulo, corpo, { url: '/?tab=comprovantes' }, true);
+    }
+
+    function iniciarMonitoramentoTempoRealComprovantes() {
+      if (supabaseClient && !canalRealtimeComprovantes) {
+        try {
+          canalRealtimeComprovantes = supabaseClient
+            .channel('celebra-comprovantes-realtime')
+            .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'comprovantes' }, (payload) => {
+              const row = payload?.new;
+              if (!row || row.status_conferencia === 'ignorado') return;
+              notificarNovoComprovanteNoPainel(row);
+              sincronizarComprovantesWhatsApp({ silencioso: true });
+              sincronizarComSupabase();
+            })
+            .subscribe();
+        } catch (e) {
+          console.warn('Aviso Realtime Supabase:', e);
+        }
+      }
+
+      if (!intervaloPollComprovantes) {
+        intervaloPollComprovantes = setInterval(() => {
+          if (document.visibilityState === 'visible') {
+            sincronizarComprovantesWhatsApp({ silencioso: true });
+          }
+        }, 30000);
+      }
+
+      if ('serviceWorker' in navigator && !window.__celebraSwMsgBound) {
+        window.__celebraSwMsgBound = true;
+        navigator.serviceWorker.addEventListener('message', (event) => {
+          if (event.data?.type === 'OPEN_TAB' && event.data.url) {
+            try {
+              const u = new URL(event.data.url, window.location.origin);
+              const tab = u.searchParams.get('tab');
+              if (tab) switchTab(tab);
+            } catch (e) {}
+          }
+        });
+      }
+    }
+
+    function pararMonitoramentoTempoRealComprovantes() {
+      if (canalRealtimeComprovantes && supabaseClient) {
+        try { supabaseClient.removeChannel(canalRealtimeComprovantes); } catch (e) {}
+        canalRealtimeComprovantes = null;
+      }
+      if (intervaloPollComprovantes) {
+        clearInterval(intervaloPollComprovantes);
+        intervaloPollComprovantes = null;
+      }
+      esteiraInicializada = false;
+    }
+
+    async function sincronizarComprovantesWhatsApp(opts = {}) {
+      const silencioso = Boolean(opts && opts.silencioso);
       const btn = document.getElementById('btnSyncWhatsApp');
       const originalText = btn ? btn.innerHTML : '';
-      if (btn) btn.innerHTML = `<span class="animate-spin text-sm">⏳</span><span>Sincronizando WhatsApp...</span>`;
+      if (btn && !silencioso) btn.innerHTML = `<span class="animate-spin text-sm">⏳</span><span>Sincronizando WhatsApp...</span>`;
 
       try {
-        const res = await fetch('/api/whatsapp?action=comprovantes');
+        const res = await fetch('/api/whatsapp?action=comprovantes', { cache: 'no-store' });
         if (res.ok) {
           const data = await res.json();
           const raw = Array.isArray(data?.comprovantes) ? data.comprovantes : [];
           const pendentes = obterFilaFiltrada(raw);
+
+          if (!esteiraInicializada) {
+            pendentes.forEach(c => { if (c.id) comprovantesNotificadosIds.add(c.id); });
+            esteiraInicializada = true;
+          } else {
+            const novos = pendentes.filter(c => c.id && !comprovantesNotificadosIds.has(c.id));
+            if (novos.length > 0) {
+              novos.forEach(notificarNovoComprovanteNoPainel);
+              sincronizarComSupabase();
+            }
+          }
+
           COMPROVANTES_ESTEIRA = pendentes;
-          indiceComprovanteAtivo = 0;
+          if (indiceComprovanteAtivo >= COMPROVANTES_ESTEIRA.length) indiceComprovanteAtivo = 0;
           renderizarEsteira();
 
-          if (pendentes.length > 0) {
-            mostrarNotificacaoSwiftUI('WhatsApp Sincronizado', `${pendentes.length} comprovante(s) real(is) pendente(s) para conferência.`, 'sucesso');
-          } else {
-            mostrarNotificacaoSwiftUI('WhatsApp em Dia', 'Nenhum comprovante pendente no momento — tudo conferido!', 'sucesso');
+          if (!silencioso) {
+            if (pendentes.length > 0) {
+              mostrarNotificacaoSwiftUI('WhatsApp Sincronizado', `${pendentes.length} comprovante(s) real(is) pendente(s) para conferência.`, 'sucesso');
+            } else {
+              mostrarNotificacaoSwiftUI('WhatsApp em Dia', 'Nenhum comprovante pendente no momento — tudo conferido!', 'sucesso');
+            }
           }
-        } else {
+        } else if (!silencioso) {
           const pendentes = obterFilaFiltrada(TODOS_COMPROVANTES_BASE);
           COMPROVANTES_ESTEIRA = pendentes;
           renderizarEsteira();
           mostrarNotificacaoSwiftUI('Modo Offline/Demo', `${pendentes.length} comprovante(s) carregado(s) localmente.`, 'aviso');
         }
       } catch(e) {
-        const pendentes = obterFilaFiltrada(TODOS_COMPROVANTES_BASE);
-        COMPROVANTES_ESTEIRA = pendentes;
-        renderizarEsteira();
-        mostrarNotificacaoSwiftUI('WhatsApp Conectado', 'Fila de comprovantes sincronizada.', 'sucesso');
+        if (!silencioso) {
+          const pendentes = obterFilaFiltrada(TODOS_COMPROVANTES_BASE);
+          COMPROVANTES_ESTEIRA = pendentes;
+          renderizarEsteira();
+          mostrarNotificacaoSwiftUI('WhatsApp Conectado', 'Fila de comprovantes sincronizada.', 'sucesso');
+        }
       } finally {
-        if (btn) btn.innerHTML = originalText;
+        if (btn && !silencioso) btn.innerHTML = originalText;
       }
     }
 
@@ -2656,21 +2760,21 @@
     // CENTRAL DE NOTIFICAÇÕES WHATSAPP (LUANA & MARIA CLARA)
     // ==========================================
     function salvarTelefonesDiretoria() {
-      const telLuana = document.getElementById('telNotifLuana')?.value.trim() || '22999516621';
-      const telMaria = document.getElementById('telNotifMaria')?.value.trim() || '22999255749';
-      localStorage.setItem('celebra_tel_luana', telLuana);
-      localStorage.setItem('celebra_tel_maria', telMaria);
+      const telLuana = document.getElementById('telNotifLuana')?.value.trim() || '22998811410';
+      const telMaria = document.getElementById('telNotifMaria')?.value.trim() || '22999516621';
+      localStorage.setItem('celebra_tel_luana_v2', telLuana);
+      localStorage.setItem('celebra_tel_maria_v2', telMaria);
     }
 
     function abrirModalNotificarDiretoria(tipo = 'comprovante') {
       const modal = document.getElementById('modalNotificarDiretoria');
       if (!modal) return;
 
-      // Carrega telefones salvos
-      const telLuanaSalvo = localStorage.getItem('celebra_tel_luana');
-      const telMariaSalvo = localStorage.getItem('celebra_tel_maria');
-      if (telLuanaSalvo && document.getElementById('telNotifLuana')) document.getElementById('telNotifLuana').value = telLuanaSalvo;
-      if (telMariaSalvo && document.getElementById('telNotifMaria')) document.getElementById('telNotifMaria').value = telMariaSalvo;
+      // Carrega telefones salvos (v2 corrige números trocados da versão anterior)
+      const telLuanaSalvo = localStorage.getItem('celebra_tel_luana_v2') || '22998811410';
+      const telMariaSalvo = localStorage.getItem('celebra_tel_maria_v2') || '22999516621';
+      if (document.getElementById('telNotifLuana')) document.getElementById('telNotifLuana').value = telLuanaSalvo;
+      if (document.getElementById('telNotifMaria')) document.getElementById('telNotifMaria').value = telMariaSalvo;
 
       aplicarTemplateNotif(tipo);
       modal.classList.remove('hidden');
@@ -2693,13 +2797,13 @@
       const saldoCaixa = (Number(TURMA_ATUAL?.saldo_santander) || 58893.03) + (Number(TURMA_ATUAL?.saldo_cora) || 37573.06);
 
       if (tipo === 'comprovante') {
-        txt.value = `Olá, Diretoria Celebra! 🎓✨\n\nConstam ${pendentesCount > 0 ? pendentesCount : 'novos'} comprovante(s) Pix recebido(s) no WhatsApp aguardando sua conferência e aprovação na Esteira IA do Celebra CRM.\n\n🔗 Acesse para aprovar: https://celebra-crm.vercel.app\n\n— Notificação do Sistema Celebra CRM`;
+        txt.value = `Olá, Diretoria Celebra! 🎓✨\n\nConstam ${pendentesCount > 0 ? pendentesCount : 'novos'} comprovante(s) Pix recebido(s) no WhatsApp aguardando sua conferência e aprovação na Esteira IA do Celebra CRM.\n\n🔗 Acesse para aprovar: https://celebra-crm.vercel.app/?tab=comprovantes\n\n— Notificação do Sistema Celebra CRM`;
       } else if (tipo === 'reta_final') {
-        txt.value = `Olá, Diretoria Celebra! ⏳🎉\n\nFaltam apenas ${dias} dias para o grande baile do Terceirão no Salão Nobre Guerrah Hall (3 de Dezembro)!\n\n📊 Status do Evento:\n• Total Arrecadado: ${formatarMoedaBRL(totalPago)} (${pct}%)\n• Formandos Quitados: ${qtdQuitados} de ${FORMANDOS.length}\n• Saldo em Caixa Hoje: ${formatarMoedaBRL(saldoCaixa)}\n\n🔗 Acompanhe o fluxo: https://celebra-crm.vercel.app\n\n— Notificação do Sistema Celebra CRM`;
+        txt.value = `Olá, Diretoria Celebra! ⏳🎉\n\nFaltam apenas ${dias} dias para o grande baile de formatura do Terceirão Aprovado (3 de Dezembro)!\n\n📊 Status do Evento:\n• Total Arrecadado: ${formatarMoedaBRL(totalPago)} (${pct}%)\n• Formandos Quitados: ${qtdQuitados} de ${FORMANDOS.length}\n• Saldo em Caixa Hoje: ${formatarMoedaBRL(saldoCaixa)}\n\n🔗 Acompanhe o fluxo: https://celebra-crm.vercel.app\n\n— Notificação do Sistema Celebra CRM`;
       } else if (tipo === 'caixa') {
         txt.value = `Resumo Financeiro Celebra Eventos 💰✨\n\n• Total Pago pelos Pais: ${formatarMoedaBRL(totalPago)}\n• Saldo Disponível Hoje: ${formatarMoedaBRL(saldoCaixa)} (Santander + Cora)\n• A Receber (Parcelas Finais): ${formatarMoedaBRL(totalFalta)}\n\n🔗 Ver fechamento completo: https://celebra-crm.vercel.app\n\n— Notificação do Sistema Celebra CRM`;
       } else if (tipo === 'contratos') {
-        txt.value = `Atenção Diretoria! 📋⚠️\n\nAinda constam ${qtdSemContrato} formandos sem contrato assinado e ${qtdAndamento} com parcelas finais em aberto para a formatura de 3 de Dezembro no Guerrah Hall.\n\n🔗 Cobrar responsáveis: https://celebra-crm.vercel.app\n\n— Notificação do Sistema Celebra CRM`;
+        txt.value = `Atenção Diretoria! 📋⚠️\n\nAinda constam ${qtdSemContrato} formandos sem contrato assinado e ${qtdAndamento} com parcelas finais em aberto para a formatura de 3 de Dezembro do Terceirão Aprovado.\n\n🔗 Cobrar responsáveis: https://celebra-crm.vercel.app\n\n— Notificação do Sistema Celebra CRM`;
       }
 
       atualizarCharCountNotif();
@@ -2890,9 +2994,9 @@
       }
     }
 
-    function dispararNotificacaoNativa(titulo, corpo, dados = {}) {
+    function dispararNotificacaoNativa(titulo, corpo, dados = {}, silenciosoSeSemPermissao = false) {
       if (!('Notification' in window) || Notification.permission !== 'granted') {
-        solicitarPermissaoNativa();
+        if (!silenciosoSeSemPermissao) solicitarPermissaoNativa();
         return;
       }
 
@@ -2938,7 +3042,7 @@
         const totalPago = FORMANDOS.reduce((acc, f) => acc + (Number(f.pago) || 0), 0);
         dispararNotificacaoNativa(
           'Celebra Eventos • Reta Final ⏳',
-          `Faltam apenas ${dias} dias para a formatura no Salão Nobre Guerrah Hall! ${formatarMoedaBRL(totalPago)} arrecadados.`,
+          `Faltam apenas ${dias} dias para a formatura do Terceirão Aprovado! ${formatarMoedaBRL(totalPago)} arrecadados.`,
           { url: '/' }
         );
       } else if (tipo === 'comprovante') {

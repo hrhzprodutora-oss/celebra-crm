@@ -19,6 +19,7 @@ self.addEventListener('notificationclick', (event) => {
     self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clientList) => {
       for (const client of clientList) {
         if (client.url.includes('celebra') && 'focus' in client) {
+          client.postMessage({ type: 'OPEN_TAB', url: targetUrl });
           return client.focus();
         }
       }

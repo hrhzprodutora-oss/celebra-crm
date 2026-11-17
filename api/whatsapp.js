@@ -16,6 +16,14 @@ const GEMINI_MODELS = process.env.GEMINI_MODEL
 const DATA_FORMATURA_ISO = "2026-12-03";
 const SAUDACAO_COOLDOWN_HORAS = 12;
 
+// Números da Diretoria que recebem alertas automáticos de comprovantes no celular
+// Padrão: Maria Clara Vianna (5522999516621). Pode configurar múltiplos via env DIRETORIA_ALERTA_NUMEROS="5522999516621,5522998811410"
+const NUMERO_TESTE_DEV = "5522999255749";
+const DIRETORIA_ALERTA_NUMEROS = (process.env.DIRETORIA_ALERTA_NUMEROS || "5522999516621")
+  .split(",")
+  .map(n => n.replace(/\D/g, ""))
+  .filter(n => n.length >= 10);
+
 const STOPWORDS = new Set([
   "de", "da", "do", "dos", "das", "e", "a", "o", "as", "os", "em", "no", "na", "nos", "nas",
   "para", "por", "com", "que", "seu", "sua", "pix", "comprovante", "parcela", "parcelas",
@@ -611,6 +619,16 @@ export default async function handler(req, res) {
 
         const respostaErro = `${cumprimento} 🎓✨\n\nRecebemos o seu arquivo! Nossa equipe financeira vai conferir os dados do comprovante e realizar a baixa no sistema em instantes.\n\nAgradecemos o envio! Qualquer dúvida, estamos à disposição. 💼✨`;
         await enviarWhatsApp(targetRecipient, respostaErro);
+        await notificarDiretoriaComprovante({
+          tipo: "erro_leitura",
+          senderPhone,
+          pushName,
+          valor: null,
+          pagador: pushName || senderPhone || "Não identificado",
+          banco: mimeType === "application/pdf" ? "PDF" : "Imagem",
+          formando: matchParcial.formando,
+          motivo: `Falha na leitura automática (${ocrErro || "erro"}). Conferir arquivo manualmente.`
+        });
 
         return res.status(200).json({
           success: true,
@@ -800,6 +818,16 @@ export default async function handler(req, res) {
         const trechoAluno = (formando && match.confianca === "ALTA") ? ` referente ao(à) formando(a) *${formando.nome}*` : "";
         const respostaExtra = `${cumprimento} 🎓✨\n\nIdentificamos o envio do comprovante${trechoValor} referente a *Convites Extras*${trechoAluno}.\n\n📌 *Status:* Encaminhado para conferência da nossa equipe financeira. Os convites extras serão vinculados ao cadastro sem alterar o contrato original da formatura!\n\nQualquer dúvida, nossa equipe está à disposição. 💼🎉`;
         await enviarWhatsApp(targetRecipient, respostaExtra);
+        await notificarDiretoriaComprovante({
+          tipo: "convite_extra",
+          senderPhone,
+          pushName,
+          valor: valorDetectado,
+          pagador: ocr.nome_pagador || pushName || "Não identificado",
+          banco: ocr.banco_pagador || "-",
+          formando,
+          motivo: `Convite extra identificado. ${match.motivo}`
+        });
 
         return res.status(200).json({
           success: true,
@@ -857,6 +885,17 @@ export default async function handler(req, res) {
           novoFalta
         });
         await enviarWhatsApp(targetRecipient, respostaAuto);
+        await notificarDiretoriaComprovante({
+          tipo: "aprovado_auto",
+          senderPhone,
+          pushName,
+          valor: valorDetectado,
+          pagador: ocr.nome_pagador || pushName || "Não identificado",
+          banco: ocr.banco_pagador || "-",
+          formando,
+          novoFalta,
+          motivo: match.motivo
+        });
 
         return res.status(200).json({
           success: true,
@@ -918,6 +957,16 @@ export default async function handler(req, res) {
       }
 
       await enviarWhatsApp(targetRecipient, respostaConferencia);
+      await notificarDiretoriaComprovante({
+        tipo: "pendente_conferencia",
+        senderPhone,
+        pushName,
+        valor: valorDetectado,
+        pagador: ocr.nome_pagador || pushName || "Não identificado",
+        banco: ocr.banco_pagador || "-",
+        formando,
+        motivo: motivoFinal
+      });
 
       return res.status(200).json({
         success: true,
@@ -939,7 +988,7 @@ export default async function handler(req, res) {
       if (ehSaudacaoIsolada(textMsg)) {
         const emCooldown = await verificarCooldownSaudacao(targetRecipient, rawRemoteJid);
         if (!emCooldown) {
-          const saudacao = `Olá! Seja bem-vindo(a) ao *Canal Financeiro Oficial da Celebra Eventos*! 💳🎓\n\nEste canal é exclusivo para atendimento financeiro, envio de comprovantes (Pix ou boleto pago) e baixa de parcelas da formatura do *Terceirão Aprovado (Guerrah Hall)*.\n\n📸 *Envio de Comprovante:*\nBasta enviar a *foto ou PDF* do comprovante aqui na conversa (se puder, informe o nome completo do formando junto). Nosso sistema analisa e encaminha para baixa no cadastro!\n\nCaso tenha alguma dúvida financeira, pode enviar sua mensagem que nossa equipe responderá em breve. 💼✨`;
+          const saudacao = `Olá! Seja bem-vindo(a) ao *Canal Financeiro Oficial da Celebra Eventos*! 💳🎓\n\nEste canal é exclusivo para atendimento financeiro, envio de comprovantes (Pix ou boleto pago) e baixa de parcelas da formatura do *Terceirão Aprovado*.\n\n📸 *Envio de Comprovante:*\nBasta enviar a *foto ou PDF* do comprovante aqui na conversa (se puder, informe o nome completo do formando junto). Nosso sistema analisa e encaminha para baixa no cadastro!\n\nCaso tenha alguma dúvida financeira, pode enviar sua mensagem que nossa equipe responderá em breve. 💼✨`;
           await enviarWhatsApp(targetRecipient, saudacao);
           await registrarInteracaoSupabase(targetRecipient, senderPhone, "saudacao_enviada", textMsg);
           return res.status(200).json({ success: true, acao: "auto_reply_saudacao" });
@@ -1089,7 +1138,7 @@ async function analisarComprovanteComGemini({
     })
     .join("\n");
 
-  const promptAuditoria = `Você é o AUDITOR FINANCEIRO SÊNIOR da Celebra Eventos (Formatura do Terceirão — Colégio Aprovado, Macaé-RJ, Guerrah Hall).
+  const promptAuditoria = `Você é o AUDITOR FINANCEIRO SÊNIOR da Celebra Eventos (Formatura do Terceirão — Colégio Aprovado, Macaé-RJ).
 Analise CUIDADOSAMENTE o documento/imagem anexado (pode ser PDF bancário ou print de celular) e o contexto da conversa.
 
 DADOS OFICIAIS DA RECEBEDORA (CELEBRA EVENTOS — SEMPRE É O FAVORECIDO/DESTINO, NUNCA O PAGADOR):
@@ -1205,7 +1254,8 @@ async function chamarGeminiInteractions({ model, apiKey, prompt, cleanBase64, mi
           { type: "text", text: prompt }
         ],
         generation_config: {
-          temperature: 0
+          temperature: 0,
+          thinking_level: "minimal"
         },
         response_format: {
           type: "text",
@@ -1487,16 +1537,14 @@ export function vincularFormandoComSeguranca({
   const sobrenomesPagador = new Set(pagadorTokensLista.slice(1)); // Exclui o 1º nome do pagador para match de sobrenome de família
   const tokensPush = new Set(tokenizarPalavras(pushName || ""));
 
-  // Helper de match de palavra inteira (com tolerância de 1 typo APENAS em palavras >= 5 chars que não colidem com outro nome!)
+  // Helper de match de palavra inteira (tolerância de 1 typo APENAS em nomes próprios >= 6 chars sem colisão!)
   const temToken = (conjunto, alvo) => {
     if (conjunto.has(alvo)) return true;
-    if (alvo.length >= 5) {
+    if (alvo.length >= 6) {
       for (const t of conjunto) {
-        if (t.length >= 5 && Math.abs(t.length - alvo.length) <= 1) {
-          // Evita confundir nomes diferentes como lucas/lukas, gabriel/gabriela, rafael/rafaela, marco/marcos, luiz/luiza
+        if (t.length >= 6 && Math.abs(t.length - alvo.length) <= 1) {
           if (todosPrimeirosNomes.has(t) && t !== alvo) continue;
           if (distanciaLevenshtein(t, alvo) === 1) {
-            // Não permite diferença apenas de gênero no último caractere (gabriel vs gabriela, daniel vs daniela)
             if (t.startsWith(alvo) || alvo.startsWith(t)) continue;
             return true;
           }
@@ -1901,8 +1949,8 @@ function montarMensagemConfirmacaoBaixa({ saudacaoNome, formando, valor, pagador
   const valorFmt = formatarBRL(valor);
   const dias = calcularDiasParaFormatura();
   const linhaContagem = dias > 1
-    ? `\n⏳ *Reta Final:* Faltam apenas *${dias} dias* para o grande baile no Guerrah Hall!`
-    : (dias === 1 ? `\n⏳ *É AMANHÃ!* Chegou o grande dia do baile no Guerrah Hall!` : "");
+    ? `\n⏳ *Reta Final:* Faltam apenas *${dias} dias* para a formatura do Terceirão Aprovado!`
+    : (dias === 1 ? `\n⏳ *É AMANHÃ!* Chegou o grande dia da formatura do Terceirão Aprovado!` : "");
   const linhaPagador = pagadorNome ? `\n👤 *Pagador identificado:* ${pagadorNome}` : "";
 
   if (novoFalta <= 0.01) {
@@ -1910,6 +1958,47 @@ function montarMensagemConfirmacaoBaixa({ saudacaoNome, formando, valor, pagador
   }
 
   return `${cumprimento} 🎓✨\n\nConfirmamos o recebimento do comprovante no valor de *R$ ${valorFmt}* referente à formatura de *${formando.nome}*!${linhaPagador}\n\n✅ *Status:* Pagamento registrado e parcela baixada com sucesso no sistema.\n💰 *Saldo restante:* R$ ${formatarBRL(novoFalta)}${linhaContagem}\n\nAgradecemos a pontualidade! Qualquer dúvida, nossa equipe financeira está à disposição. 💼🎉`;
+}
+
+async function notificarDiretoriaComprovante({ tipo, senderPhone, pushName, valor, pagador, banco, formando, novoFalta, motivo }) {
+  try {
+    // Se a mensagem veio do número de testes do Henry, envia o alerta apenas para ele (não incomoda Maria Clara nos testes!)
+    const ehTesteDev = senderPhone && senderPhone.endsWith(NUMERO_TESTE_DEV.slice(-8));
+    const destinatarios = ehTesteDev ? [NUMERO_TESTE_DEV] : DIRETORIA_ALERTA_NUMEROS;
+    if (!destinatarios || destinatarios.length === 0) return;
+
+    const valorTxt = valor ? `R$ ${formatarBRL(valor)}` : "Não identificado (conferir arquivo)";
+    const formandoTxt = formando ? `#${formando.num || formando.id} ${formando.nome}` : "Não vinculado (selecionar no CRM)";
+    const remetenteTxt = [pushName, senderPhone ? `(${senderPhone})` : ""].filter(Boolean).join(" ") || "WhatsApp";
+
+    let cabecalho = "📩 *NOVO COMPROVANTE NO WHATSAPP • CELEBRA CRM*";
+    let link = "https://celebra-crm.vercel.app/?tab=comprovantes";
+    let linhaExtra = "";
+
+    if (tipo === "aprovado_auto") {
+      cabecalho = "✅ *BAIXA AUTOMÁTICA REALIZADA • CELEBRA CRM*";
+      link = "https://celebra-crm.vercel.app/?tab=formandos";
+      linhaExtra = novoFalta !== undefined
+        ? (novoFalta <= 0.01 ? "\n🎉 *Situação:* 100% QUITADO!" : `\n💵 *Saldo restante:* R$ ${formatarBRL(novoFalta)}`)
+        : "";
+    } else if (tipo === "convite_extra") {
+      cabecalho = "🎟️ *CONVITE EXTRA RECEBIDO • CELEBRA CRM*";
+    } else if (tipo === "erro_leitura") {
+      cabecalho = "❌ *COMPROVANTE PRECISA DE CONFERÊNCIA VISUAL • CELEBRA CRM*";
+    } else if (tipo === "pendente_conferencia") {
+      cabecalho = "⚠️ *COMPROVANTE AGUARDANDO SUA CONFERÊNCIA • CELEBRA CRM*";
+    }
+
+    const textoAlerta = `${cabecalho}\n\n💰 *Valor:* ${valorTxt}\n🎓 *Formando:* ${formandoTxt}\n👤 *Pagador:* ${pagador || "Não identificado"}\n🏦 *Banco:* ${banco || "-"}\n📱 *Enviado por:* ${remetenteTxt}${linhaExtra}\n📌 *Auditoria IA:* ${motivo || "-"}\n\n🔗 *Abrir no celular:* ${link}`;
+
+    for (const num of destinatarios) {
+      // Evita duplicar para o próprio remetente exceto quando é teste dev (onde Henry quer ver ambos os lados!)
+      if (!ehTesteDev && senderPhone && num.endsWith(senderPhone.slice(-8))) continue;
+      await enviarWhatsApp(`${num}@s.whatsapp.net`, textoAlerta);
+    }
+  } catch (e) {
+    console.warn("Aviso ao notificar diretoria:", e.message);
+  }
 }
 
 // =========================================================================

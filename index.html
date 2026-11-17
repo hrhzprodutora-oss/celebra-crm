@@ -2128,6 +2128,26 @@
 
       const c = COMPROVANTES_ESTEIRA[indiceComprovanteAtivo];
       const isExtra = c.tipoBadge.includes('Extra');
+      const isAlerta = isExtra || c.confianca.includes('⚠️') || !c.formandoId;
+      const listaFormandosOrdenada = [...(FORMANDOS || [])].sort((a, b) => (a.num || a.id || 0) - (b.num || b.id || 0));
+      const candidatosIds = new Set((c.candidatos || []).map(x => Number(x.id)));
+
+      const opcoesFormandos = [
+        `<option value="">— Selecione o formando correto —</option>`,
+        ...listaFormandosOrdenada.map(f => {
+          const fid = f.id || f.num;
+          const selected = Number(c.formandoId) === Number(fid) ? 'selected' : '';
+          const tagCand = candidatosIds.has(Number(fid)) ? ' ⭐ (Sugerido IA)' : '';
+          return `<option value="${fid}" ${selected}>#${f.num || fid} - ${f.nome} (Resp: ${f.responsavel || 'N/D'})${tagCand}</option>`;
+        })
+      ].join('');
+
+      const blocoAuditoria = c.motivoVinculo ? `
+        <div class="rounded-2xl p-3.5 border ${isAlerta ? 'bg-amber-50/70 dark:bg-amber-950/30 border-amber-200 dark:border-amber-800/60 text-amber-800 dark:text-amber-200' : 'bg-emerald-50/60 dark:bg-emerald-950/20 border-emerald-200 dark:border-emerald-800/50 text-emerald-800 dark:text-emerald-200'} text-xs">
+          <div class="font-bold mb-0.5">${isAlerta ? '⚠️ Auditoria da IA (Revisão Recomendada)' : '✅ Auditoria da IA'}</div>
+          <div class="text-[11px] opacity-90">${c.motivoVinculo}</div>
+        </div>
+      ` : '';
 
       painel.innerHTML = `
         <div class="space-y-5">
@@ -2135,11 +2155,11 @@
             <div>
               <h3 class="text-base font-bold text-gray-900 dark:text-white flex items-center space-x-2">
                 <span>Conferência de Comprovante do WhatsApp</span>
-                <span class="${isExtra ? 'bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-400 border border-amber-500/20' : 'bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20'} text-[10px] font-bold px-2.5 py-0.5 rounded-full">
+                <span class="${isAlerta ? 'bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-400 border border-amber-500/20' : 'bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20'} text-[10px] font-bold px-2.5 py-0.5 rounded-full">
                   ${c.confianca}
                 </span>
               </h3>
-              <p class="text-xs text-gray-500 dark:text-gray-400">Verificação automática pelo Gemini 3.8 Flash vs. Banco de Dados</p>
+              <p class="text-xs text-gray-500 dark:text-gray-400">Auditoria Multimodal (PDF + Imagem) Gemini 4 Hydrogen vs. Banco Supabase</p>
             </div>
             <span class="text-xs text-emerald-600 dark:text-emerald-400 font-semibold flex items-center space-x-1">
               <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
@@ -2147,34 +2167,39 @@
             </span>
           </div>
 
+          ${blocoAuditoria}
+
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <!-- DADOS DO COMPROVANTE LIDO -->
             <div class="bg-gray-50 dark:bg-gray-800/40 rounded-2xl p-4 border border-gray-200/80 dark:border-gray-700/60">
-              <div class="text-[10px] text-gray-400 uppercase font-black tracking-wider">Dados do Pix Lido</div>
-              <div class="text-2xl font-black text-gray-900 dark:text-white mt-1">R$ ${c.valor.toFixed(2).replace('.', ',')}</div>
-              <div class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">${c.banco}</div>
+              <div class="text-[10px] text-gray-400 uppercase font-black tracking-wider">Dados do Comprovante Lido</div>
+              <div class="mt-1 flex items-center space-x-1.5">
+                <span class="text-lg font-black text-gray-900 dark:text-white">R$</span>
+                <input id="inputValorConferencia" type="number" step="0.01" min="0" value="${Number(c.valor || 0).toFixed(2)}" class="w-32 text-xl font-black text-gray-900 dark:text-white bg-white dark:bg-gray-900/70 border border-gray-200 dark:border-gray-700 rounded-xl px-2.5 py-1 focus:outline-none focus:ring-2 focus:ring-[#E90064]" />
+              </div>
+              <div class="text-xs text-gray-500 dark:text-gray-400 mt-1">${c.banco}</div>
               <hr class="border-gray-200 dark:border-gray-700/60 my-2.5">
               <div class="text-[11px] text-gray-600 dark:text-gray-300 space-y-1">
                 <div><strong>Pagador:</strong> ${c.pagador}</div>
                 <div><strong>CPF:</strong> ${c.cpf}</div>
                 <div><strong>Detalhes:</strong> ${c.detalhes}</div>
-                <div class="text-[10px] text-gray-400 italic mt-1">Legenda: "${c.textoMsg}"</div>
+                <div class="text-[10px] text-gray-400 italic mt-1">Mensagem/Legenda: "${c.textoMsg}"</div>
               </div>
             </div>
 
             <!-- VÍNCULO NO BANCO SUPABASE -->
-            <div class="bg-pink-50/50 dark:bg-pink-950/20 rounded-2xl p-4 border border-pink-100 dark:border-pink-900/40">
-              <div class="text-[10px] font-bold uppercase tracking-wider text-[#E90064]">Vínculo no CRM</div>
-              <div class="mt-1 text-sm font-bold text-gray-900 dark:text-white">
-                #${c.formandoId} - ${c.formandoNome}
-              </div>
-              <div class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+            <div class="bg-pink-50/50 dark:bg-pink-950/20 rounded-2xl p-4 border border-pink-100 dark:border-pink-900/40 space-y-2">
+              <div class="text-[10px] font-bold uppercase tracking-wider text-[#E90064]">Vínculo no CRM (Confirmar ou Alterar)</div>
+              <select id="selectFormandoConferencia" onchange="atualizarPreviaVinculoConferencia()" class="w-full text-xs font-bold text-gray-900 dark:text-white bg-white dark:bg-gray-900 border border-pink-200 dark:border-pink-800/60 rounded-xl px-2.5 py-2 focus:outline-none focus:ring-2 focus:ring-[#E90064]">
+                ${opcoesFormandos}
+              </select>
+              <div id="infoResponsavelConferencia" class="text-xs text-gray-500 dark:text-gray-400">
                 Responsável: ${c.responsavel}
               </div>
-              <hr class="border-pink-200/60 dark:border-pink-900/40 my-2.5">
+              <hr class="border-pink-200/60 dark:border-pink-900/40 my-2">
               <div class="space-y-1">
-                <div class="text-[11px] text-gray-500 dark:text-gray-400">Antes: ${c.statusAntes}</div>
-                <div class="text-xs font-bold ${isExtra ? 'text-amber-600 dark:text-amber-400' : 'text-emerald-600 dark:text-emerald-400'}">${c.statusDepois}</div>
+                <div id="infoStatusAntesConferencia" class="text-[11px] text-gray-500 dark:text-gray-400">Antes: ${c.statusAntes}</div>
+                <div id="infoStatusDepoisConferencia" class="text-xs font-bold ${isExtra ? 'text-amber-600 dark:text-amber-400' : 'text-emerald-600 dark:text-emerald-400'}">${c.statusDepois}</div>
               </div>
             </div>
           </div>
@@ -2182,16 +2207,16 @@
 
         <div class="pt-5 border-t border-gray-100 dark:border-gray-800 flex flex-wrap sm:flex-nowrap items-center gap-3">
           ${isExtra ? `
-            <button onclick="marcarDuvidaComprovante('${c.id}')" id="btnDuvidaAtual" class="flex-1 py-3.5 bg-amber-500 hover:bg-amber-600 text-gray-950 font-black text-xs sm:text-sm rounded-2xl shadow-lg transition-all active:scale-[0.98] flex items-center justify-center space-x-2">
+            <button onclick="marcarDuvidaComprovante('${c.id}', 'convite_extra_confirmado')" id="btnDuvidaAtual" class="flex-1 py-3.5 bg-amber-500 hover:bg-amber-600 text-gray-950 font-black text-xs sm:text-sm rounded-2xl shadow-lg transition-all active:scale-[0.98] flex items-center justify-center space-x-2">
               <span>⚠️</span>
-              <span>Marcar para Conferência da Equipe</span>
+              <span>Confirmar Convites Extras (Sem Alterar Contrato)</span>
             </button>
           ` : `
             <button onclick="aprovarComprovanteInterativo('${c.id}')" id="btnAprovarAtual" class="flex-1 py-3.5 bg-[#CCFF00] hover:bg-[#b8e600] text-gray-950 font-black text-xs sm:text-sm rounded-2xl shadow-lg transition-all active:scale-[0.98] flex items-center justify-center space-x-2">
               <span>✓</span>
               <span>Aprovar e Lançar no CRM</span>
             </button>
-            <button onclick="marcarDuvidaComprovante('${c.id}')" class="px-4 py-3.5 rounded-2xl border border-amber-300/60 dark:border-amber-700/60 text-xs font-bold text-amber-600 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-950/30 transition-colors">
+            <button onclick="marcarDuvidaComprovante('${c.id}', 'duvida')" class="px-4 py-3.5 rounded-2xl border border-amber-300/60 dark:border-amber-700/60 text-xs font-bold text-amber-600 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-950/30 transition-colors">
               Dúvida ⚠️
             </button>
           `}
@@ -2200,6 +2225,34 @@
           </button>
         </div>
       `;
+    }
+
+    function atualizarPreviaVinculoConferencia() {
+      const sel = document.getElementById('selectFormandoConferencia');
+      const valInput = document.getElementById('inputValorConferencia');
+      const respEl = document.getElementById('infoResponsavelConferencia');
+      const antesEl = document.getElementById('infoStatusAntesConferencia');
+      const depoisEl = document.getElementById('infoStatusDepoisConferencia');
+      if (!sel) return;
+
+      const selectedId = Number(sel.value);
+      const valor = parseFloat(valInput?.value || '0') || 0;
+      const f = (FORMANDOS || []).find(x => Number(x.id || x.num) === selectedId);
+      if (!f) {
+        if (respEl) respEl.innerText = 'Responsável: Selecione um formando';
+        if (antesEl) antesEl.innerText = 'Antes: Aguardando vínculo';
+        if (depoisEl) depoisEl.innerText = '⚠️ Selecione o formando antes de aprovar';
+        return;
+      }
+
+      const faltaNova = Math.max(0, (f.falta || 0) - valor);
+      if (respEl) respEl.innerText = `Responsável: ${f.responsavel || 'N/D'}`;
+      if (antesEl) antesEl.innerText = `Antes: R$ ${(f.pago || 0).toFixed(2).replace('.', ',')} pagos (Faltam R$ ${(f.falta || 0).toFixed(2).replace('.', ',')})`;
+      if (depoisEl) {
+        depoisEl.innerText = faltaNova <= 0.01
+          ? `🎉 100% QUITADO! (Total R$ ${(f.total || 3990).toFixed(2).replace('.', ',')})`
+          : `Total pago sobe para R$ ${((f.pago || 0) + valor).toFixed(2).replace('.', ',')} (Faltará R$ ${faltaNova.toFixed(2).replace('.', ',')})`;
+      }
     }
 
     function selecionarComprovanteEsteira(index) {
@@ -2218,28 +2271,55 @@
 
       if (!comp) return;
 
+      const selEl = document.getElementById('selectFormandoConferencia');
+      const valEl = document.getElementById('inputValorConferencia');
+      const formandoIdSelecionado = Number(selEl?.value || comp.formandoId || 0);
+      const valorFinal = parseFloat(valEl?.value || comp.valor || '0');
+
+      if (!formandoIdSelecionado) {
+        mostrarNotificacaoSwiftUI('Selecione o Formando', 'Escolha o formando correto na lista antes de aprovar e dar baixa.', 'aviso');
+        return;
+      }
+      if (!valorFinal || valorFinal <= 0) {
+        mostrarNotificacaoSwiftUI('Valor Inválido', 'Informe o valor exato do comprovante antes de aprovar.', 'aviso');
+        return;
+      }
+
+      const formando = FORMANDOS.find(f => Number(f.id || f.num) === formandoIdSelecionado);
+      if (!formando) {
+        mostrarNotificacaoSwiftUI('Formando não encontrado', 'Não foi possível localizar o cadastro selecionado.', 'aviso');
+        return;
+      }
+
       if (cardEl) {
         cardEl.classList.add('card-slide-out');
       }
 
       setTimeout(async () => {
-        // 1. Salva como processado de forma permanente no navegador
-        salvarComprovanteProcessado(id);
-        COMPROVANTES_ESTEIRA = obterFilaFiltrada(COMPROVANTES_ESTEIRA);
+        // 1. Atualiza estado local com o formando EXATAMENTE selecionado (nunca por 1º nome!)
+        formando.pago = Math.round(((formando.pago || 0) + valorFinal) * 100) / 100;
+        formando.falta = Math.max(0, Math.round(((formando.total || 3990) - formando.pago) * 100) / 100);
+        if (formando.falta <= 0.01) formando.status = 'quitado';
+        renderizarTabela(FORMANDOS);
+        if (typeof atualizarTotaisKPIs === 'function') atualizarTotaisKPIs();
 
-        // 2. Atualiza formando no estado local
-        const formando = FORMANDOS.find(f => f.num === comp.formandoId || f.nome.toLowerCase().includes(comp.formandoNome.split(' ')[0].toLowerCase()));
-        if (formando) {
-          formando.pago += comp.valor;
-          formando.falta = Math.max(0, formando.total - formando.pago);
-          if (formando.falta <= 0) formando.status = 'quitado';
-          renderizarTabela(FORMANDOS);
-          if (typeof atualizarTotaisKPIs === 'function') atualizarTotaisKPIs();
-
-          // 3. Persiste no Supabase PostgreSQL via PATCH
-          try {
+        // 2. Persiste no Supabase (comprovante real via API ou demo via PATCH direto)
+        try {
+          if (comp.isReal) {
+            await fetch('/api/whatsapp', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                action: 'aprovar_comprovante',
+                comprovante_id: comp.id,
+                formando_id: formando.id || formando.num,
+                valor: valorFinal,
+                enviar_confirmacao_whatsapp: true
+              })
+            });
+          } else {
             const key = SUPABASE_ANON_KEY || "sb_publishable_GPBZkeBWljCdCnzf-1MH7w_yuR2JWPw";
-            await fetch(`https://ddehyuertafctuhnfgpn.supabase.co/rest/v1/formandos?id=eq.${formando.id || comp.formandoId}`, {
+            await fetch(`https://ddehyuertafctuhnfgpn.supabase.co/rest/v1/formandos?id=eq.${formando.id || formando.num}`, {
               method: 'PATCH',
               headers: {
                 'apikey': key,
@@ -2253,21 +2333,24 @@
                 status: formando.status
               })
             });
-          } catch(err) {
-            console.warn("Aviso ao sincronizar Supabase:", err);
           }
+        } catch(err) {
+          console.warn("Aviso ao sincronizar Supabase:", err);
         }
 
-        // 4. Notificação fluida SwiftUI + Notificação Nativa na Barra do Celular
+        // 3. Remove da fila local e atualiza UI
+        salvarComprovanteProcessado(id);
+        COMPROVANTES_ESTEIRA = obterFilaFiltrada(COMPROVANTES_ESTEIRA);
+
         mostrarNotificacaoSwiftUI(
           'Comprovante Aprovado!',
-          `R$ ${comp.valor.toFixed(2).replace('.', ',')} de ${comp.formandoNome} lançado com sucesso no CRM.`,
+          `R$ ${valorFinal.toFixed(2).replace('.', ',')} de ${formando.nome} lançado com sucesso no CRM.`,
           'sucesso'
         );
 
         dispararNotificacaoNativa(
           'Celebra Eventos • Baixa Realizada ✅',
-          `Comprovante de R$ ${comp.valor.toFixed(2).replace('.', ',')} de ${comp.formandoNome} baixado com sucesso no CRM.`,
+          `Comprovante de R$ ${valorFinal.toFixed(2).replace('.', ',')} de ${formando.nome} baixado com sucesso no CRM.`,
           { url: '/?tab=formandos' }
         );
 
@@ -2275,23 +2358,42 @@
       }, 350);
     }
 
-    function marcarDuvidaComprovante(id) {
+    function marcarDuvidaComprovante(id, novoStatus = 'duvida') {
       const cardEl = document.getElementById(`card-esteira-${id}`);
       const comp = COMPROVANTES_ESTEIRA.find(c => c.id === id);
       if (!comp) return;
+
+      const selEl = document.getElementById('selectFormandoConferencia');
+      const formandoIdSelecionado = Number(selEl?.value || comp.formandoId || 0) || null;
 
       if (cardEl) {
         cardEl.classList.add('card-slide-out');
       }
 
-      setTimeout(() => {
-        // Salva como processado de forma permanente no navegador
+      setTimeout(async () => {
+        if (comp.isReal) {
+          try {
+            await fetch('/api/whatsapp', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                action: 'atualizar_status_comprovante',
+                comprovante_id: comp.id,
+                status_conferencia: novoStatus,
+                formando_id: formandoIdSelecionado
+              })
+            });
+          } catch (e) {
+            console.warn('Aviso ao atualizar status do comprovante:', e);
+          }
+        }
+
         salvarComprovanteProcessado(id);
         COMPROVANTES_ESTEIRA = obterFilaFiltrada(COMPROVANTES_ESTEIRA);
 
         mostrarNotificacaoSwiftUI(
-          'Encaminhado para Conferência',
-          `Comprovante de ${comp.formandoNome} marcado para conferência da equipe financeira (contrato inalterado).`,
+          novoStatus === 'convite_extra_confirmado' ? 'Convites Extras Registrados' : 'Encaminhado para Conferência',
+          `Comprovante de ${comp.formandoNome} atualizado com sucesso (contrato inalterado).`,
           'aviso'
         );
 
@@ -2316,31 +2418,28 @@
         const res = await fetch('/api/whatsapp?action=comprovantes');
         if (res.ok) {
           const data = await res.json();
-          const raw = (data && data.comprovantes && data.comprovantes.length > 0) ? data.comprovantes : TODOS_COMPROVANTES_BASE;
+          const raw = Array.isArray(data?.comprovantes) ? data.comprovantes : [];
           const pendentes = obterFilaFiltrada(raw);
           COMPROVANTES_ESTEIRA = pendentes;
+          indiceComprovanteAtivo = 0;
           renderizarEsteira();
 
           if (pendentes.length > 0) {
-            mostrarNotificacaoSwiftUI('WhatsApp Sincronizado', `${pendentes.length} comprovante(s) pendente(s) para conferência.`, 'sucesso');
+            mostrarNotificacaoSwiftUI('WhatsApp Sincronizado', `${pendentes.length} comprovante(s) real(is) pendente(s) para conferência.`, 'sucesso');
           } else {
-            mostrarNotificacaoSwiftUI('WhatsApp em Dia', 'Todos os comprovantes recebidos já foram conferidos e baixados!', 'sucesso');
+            mostrarNotificacaoSwiftUI('WhatsApp em Dia', 'Nenhum comprovante pendente no momento — tudo conferido!', 'sucesso');
           }
         } else {
           const pendentes = obterFilaFiltrada(TODOS_COMPROVANTES_BASE);
           COMPROVANTES_ESTEIRA = pendentes;
           renderizarEsteira();
-          if (pendentes.length > 0) {
-            mostrarNotificacaoSwiftUI('WhatsApp Conectado', `${pendentes.length} comprovante(s) aguardando aprovação.`, 'sucesso');
-          } else {
-            mostrarNotificacaoSwiftUI('WhatsApp em Dia', 'Todos os comprovantes conferidos com sucesso.', 'sucesso');
-          }
+          mostrarNotificacaoSwiftUI('Modo Offline/Demo', `${pendentes.length} comprovante(s) carregado(s) localmente.`, 'aviso');
         }
       } catch(e) {
         const pendentes = obterFilaFiltrada(TODOS_COMPROVANTES_BASE);
         COMPROVANTES_ESTEIRA = pendentes;
         renderizarEsteira();
-        mostrarNotificacaoSwiftUI('WhatsApp Conectado', 'Fila de comprovantes sincronizada com sucesso.', 'sucesso');
+        mostrarNotificacaoSwiftUI('WhatsApp Conectado', 'Fila de comprovantes sincronizada.', 'sucesso');
       } finally {
         if (btn) btn.innerHTML = originalText;
       }

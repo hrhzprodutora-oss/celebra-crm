@@ -526,8 +526,8 @@
           </div>
 
           <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight">Formatura Terceirão Aprovado</h1>
-          <p class="text-pink-100 text-xs sm:text-sm mt-1">
-            48 formandos mapeados • 46 ativos na formatura • 2 desistências registradas.
+          <p id="kpiSubtituloTurma" class="text-pink-100 text-xs sm:text-sm mt-1">
+            Carregando formandos do Supabase...
           </p>
 
           <!-- BLOCO DO CONTADOR REGRESSIVO DINÂMICO (3 DE DEZEMBRO) -->
@@ -562,21 +562,21 @@
           <div class="mt-5 grid grid-cols-1 sm:grid-cols-3 gap-3">
             <div class="bg-white/10 backdrop-blur-md p-3.5 rounded-xl border border-white/20">
               <span class="text-[11px] text-pink-200 block font-semibold">TOTAL PAGO PELOS PAIS</span>
-              <span class="text-xl sm:text-2xl font-black text-white">R$ 151.653,96</span>
-              <span class="text-[11px] text-[#CCFF00] font-bold block mt-0.5">85.3% do valor arrecadado</span>
+              <span id="kpiTotalPago" class="text-xl sm:text-2xl font-black text-white">R$ 0,00</span>
+              <span id="kpiPctArrecadado" class="text-[11px] text-[#CCFF00] font-bold block mt-0.5">Calculando...</span>
             </div>
 
             <div class="bg-white/10 backdrop-blur-md p-3.5 rounded-xl border border-white/20">
               <span class="text-[11px] text-pink-200 block font-semibold">SALDO DISPONÍVEL HOJE</span>
-              <span class="text-xl sm:text-2xl font-black text-[#CCFF00]">R$ 96.466,09</span>
-              <div class="text-[10px] text-pink-100 mt-0.5">
-                Santander: R$ 58.893 • Cora: R$ 37.573
+              <span id="kpiSaldoDisponivel" class="text-xl sm:text-2xl font-black text-[#CCFF00]">R$ 96.466,09</span>
+              <div id="kpiSaldoBancos" class="text-[10px] text-pink-100 mt-0.5">
+                Santander: R$ 58.893,03 • Cora: R$ 37.573,06
               </div>
             </div>
 
             <div class="bg-white/10 backdrop-blur-md p-3.5 rounded-xl border border-white/20">
               <span class="text-[11px] text-pink-200 block font-semibold">A RECEBER (PARCELAS FINAIS)</span>
-              <span class="text-xl sm:text-2xl font-black text-white">R$ 26.124,35</span>
+              <span id="kpiAReceber" class="text-xl sm:text-2xl font-black text-white">R$ 0,00</span>
               <span class="text-[11px] text-pink-200 block mt-0.5">Entrando até o dia 3 de dezembro</span>
             </div>
           </div>
@@ -588,7 +588,7 @@
         <div onclick="filtrarFormandos('quitado')" class="bg-white dark:bg-[#15101E] p-4 rounded-2xl border border-emerald-100 dark:border-emerald-950 hover:border-emerald-400 cursor-pointer transition-all shadow-sm">
           <span class="text-[10px] font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 block">Quitados 100%</span>
           <div class="text-2xl font-black text-gray-900 dark:text-white mt-1 flex items-baseline space-x-1">
-            <span>16</span>
+            <span id="kpiQtdQuitado">0</span>
             <span class="text-xs text-emerald-600 dark:text-emerald-400 font-bold">alunos</span>
           </div>
           <span class="inline-block mt-2 text-[10px] bg-[#CCFF00] text-gray-950 font-black px-2 py-0.5 rounded-full">
@@ -599,7 +599,7 @@
         <div onclick="filtrarFormandos('em_andamento')" class="bg-white dark:bg-[#15101E] p-4 rounded-2xl border border-blue-100 dark:border-blue-950 hover:border-blue-400 cursor-pointer transition-all shadow-sm">
           <span class="text-[10px] font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 block">Em Andamento</span>
           <div class="text-2xl font-black text-gray-900 dark:text-white mt-1 flex items-baseline space-x-1">
-            <span>23</span>
+            <span id="kpiQtdAndamento">0</span>
             <span class="text-xs text-blue-600 dark:text-blue-400 font-bold">alunos</span>
           </div>
           <span class="inline-block mt-2 text-[10px] bg-blue-50 dark:bg-blue-950 text-blue-700 dark:text-blue-300 font-bold px-2 py-0.5 rounded-full">
@@ -610,7 +610,7 @@
         <div onclick="filtrarFormandos('sem_contrato')" class="bg-white dark:bg-[#15101E] p-4 rounded-2xl border border-amber-200 dark:border-amber-950 hover:border-amber-400 cursor-pointer transition-all shadow-sm">
           <span class="text-[10px] font-bold uppercase tracking-wider text-amber-800 dark:text-amber-400 block">Sem Contrato Assinado</span>
           <div class="text-2xl font-black text-gray-900 dark:text-white mt-1 flex items-baseline space-x-1">
-            <span>4</span>
+            <span id="kpiQtdSemContrato">0</span>
             <span class="text-xs text-amber-700 dark:text-amber-300 font-bold">alunos</span>
           </div>
           <span class="inline-block mt-2 text-[10px] bg-amber-100 dark:bg-amber-950 text-amber-900 dark:text-amber-300 font-bold px-2 py-0.5 rounded-full">
@@ -621,7 +621,7 @@
         <div onclick="filtrarFormandos('sem_pagamento')" class="bg-white dark:bg-[#15101E] p-4 rounded-2xl border border-sky-200 dark:border-sky-950 hover:border-sky-400 cursor-pointer transition-all shadow-sm">
           <span class="text-[10px] font-bold uppercase tracking-wider text-sky-800 dark:text-sky-400 block">Contrato s/ Pgto</span>
           <div class="text-2xl font-black text-gray-900 dark:text-white mt-1 flex items-baseline space-x-1">
-            <span>3</span>
+            <span id="kpiQtdSemPagamento">0</span>
             <span class="text-xs text-sky-700 dark:text-sky-300 font-bold">alunos</span>
           </div>
           <span class="inline-block mt-2 text-[10px] bg-sky-100 dark:bg-sky-950 text-sky-800 dark:text-sky-300 font-bold px-2 py-0.5 rounded-full">
@@ -632,7 +632,7 @@
         <div onclick="filtrarFormandos('desistencia')" class="bg-white dark:bg-[#15101E] p-4 rounded-2xl border border-gray-200 dark:border-gray-800 hover:border-gray-400 cursor-pointer transition-all shadow-sm">
           <span class="text-[10px] font-bold uppercase tracking-wider text-gray-400 block">Desistências</span>
           <div class="text-2xl font-black text-gray-500 dark:text-gray-400 mt-1 flex items-baseline space-x-1">
-            <span>2</span>
+            <span id="kpiQtdDesistencia">0</span>
             <span class="text-xs text-gray-400">alunos</span>
           </div>
           <span class="inline-block mt-2 text-[10px] bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 font-semibold px-2 py-0.5 rounded-full">
@@ -654,7 +654,7 @@
         <div>
           <div class="flex items-center space-x-2">
             <span class="bg-[#E90064] text-white text-[10px] font-extrabold px-2 py-0.5 rounded-full uppercase">Autonomia Total</span>
-            <h3 class="text-sm font-bold text-gray-900 dark:text-white">Cadastrar Novos Alunos para o Ano Que Vem (2025/2026)</h3>
+            <h3 class="text-sm font-bold text-gray-900 dark:text-white">Cadastrar Novos Alunos para a Turma (2026/2027)</h3>
           </div>
           <p class="text-xs text-gray-600 dark:text-gray-400 mt-1">
             Nunca mais use o Excel. Luana e Maria podem adicionar novos alunos escolhendo uma das 3 formas abaixo:
@@ -689,11 +689,11 @@
 
           <select id="statusFilter" onchange="filtrarTabela()" class="text-xs bg-gray-50 dark:bg-gray-800/60 border border-gray-200 dark:border-gray-700 rounded-xl px-3 py-2 font-semibold text-gray-700 dark:text-gray-300">
             <option value="todos">Todos os Formandos</option>
-            <option value="quitado">Quitados 100% (16)</option>
-            <option value="em_andamento">Em Andamento (23)</option>
-            <option value="sem_contrato">Pgto s/ Contrato (4)</option>
-            <option value="sem_pagamento">Contrato s/ Pgto (3)</option>
-            <option value="desistencia">Desistências (2)</option>
+            <option id="optStatusQuitado" value="quitado">Quitados 100%</option>
+            <option id="optStatusAndamento" value="em_andamento">Em Andamento</option>
+            <option id="optStatusSemContrato" value="sem_contrato">Pgto s/ Contrato</option>
+            <option id="optStatusSemPagamento" value="sem_pagamento">Contrato s/ Pgto</option>
+            <option id="optStatusDesistencia" value="desistencia">Desistências</option>
           </select>
         </div>
 
@@ -751,10 +751,10 @@
           <div class="mt-4 flex flex-wrap gap-3">
             <button onclick="copiarTodosWhatsApps()" class="bg-[#CCFF00] hover:bg-[#b8e600] text-gray-950 font-black text-xs px-4 py-2 rounded-xl lime-glow transition-all flex items-center space-x-1.5">
               <svg class="w-4 h-4 text-gray-950" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"/></svg>
-              <span>Copiar Lista de WhatsApp dos Pais (48)</span>
+              <span id="btnTextoCopiarWhatsApps">Copiar Lista de WhatsApp dos Pais</span>
             </button>
 
-            <button onclick="mostrarNotificacaoSwiftUI('Exportando Contatos', 'Arquivo formatado para campanhas e WhatsApp gerado!', 'sucesso');" class="bg-white/10 hover:bg-white/20 text-white font-bold text-xs px-4 py-2 rounded-xl border border-white/20 transition-all flex items-center space-x-1.5">
+            <button onclick="exportarBaseRemarketingCSV()" class="bg-white/10 hover:bg-white/20 text-white font-bold text-xs px-4 py-2 rounded-xl border border-white/20 transition-all flex items-center space-x-1.5">
               <svg class="w-4 h-4 text-emerald-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
               <span>Exportar Base para Disparo em Massa</span>
             </button>
@@ -868,13 +868,13 @@
         </div>
         <div class="bg-white dark:bg-[#15101E] p-5 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-sm">
           <span class="text-xs font-bold uppercase text-gray-500 dark:text-gray-400">Arrecadado com a Turma</span>
-          <div class="text-xl sm:text-2xl font-black text-emerald-600 dark:text-emerald-400 mt-2">R$ 151.653,96</div>
-          <span class="text-xs text-emerald-700 dark:text-emerald-300 font-semibold">+ R$ 26.124,35 a receber</span>
+          <div id="custosTotalPago" class="text-xl sm:text-2xl font-black text-emerald-600 dark:text-emerald-400 mt-2">R$ 0,00</div>
+          <span id="custosAReceber" class="text-xs text-emerald-700 dark:text-emerald-300 font-semibold">+ R$ 0,00 a receber</span>
         </div>
         <div class="bg-white dark:bg-[#15101E] p-5 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-sm">
           <span class="text-xs font-bold uppercase text-gray-500 dark:text-gray-400">Caixa Líquido Atual</span>
-          <div class="text-xl sm:text-2xl font-black text-[#E90064] mt-2">R$ 96.466,09</div>
-          <span class="text-xs text-gray-500 dark:text-gray-400">Santander: R$ 58.893 • Cora: R$ 37.573</span>
+          <div id="custosSaldoLiquido" class="text-xl sm:text-2xl font-black text-[#E90064] mt-2">R$ 96.466,09</div>
+          <span id="custosSaldoBancos" class="text-xs text-gray-500 dark:text-gray-400">Santander: R$ 58.893,03 • Cora: R$ 37.573,06</span>
         </div>
       </div>
 
@@ -924,7 +924,7 @@
               <div class="text-sm font-bold text-gray-900 dark:text-white">R$ 491,42 (Última)</div>
               <div class="text-[11px] text-emerald-600 dark:text-emerald-400 font-semibold">Quita todo o contrato!</div>
             </div>
-            <button onclick="mostrarNotificacaoSwiftUI('Chave Pix Copiada', 'Chave copiada para a área de transferência!', 'sucesso');" class="bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-800 dark:text-white text-xs font-bold px-2.5 py-1.5 rounded-xl hover:bg-gray-100">
+            <button onclick="copiarChavePixOficial()" class="bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-800 dark:text-white text-xs font-bold px-2.5 py-1.5 rounded-xl hover:bg-gray-100">
               Copiar Pix
             </button>
           </div>
@@ -955,7 +955,7 @@
       </p>
 
       <div class="bg-gray-50 dark:bg-gray-800/60 p-3 rounded-xl border border-gray-200 dark:border-gray-700 flex items-center justify-between">
-        <code id="linkPublicoTexto" class="text-xs text-[#E90064] font-bold truncate">https://celebra-crm.vercel.app/inscricao/aprovado-2025</code>
+        <code id="linkPublicoTexto" class="text-xs text-[#E90064] font-bold truncate">https://wa.me/5522933008137?text=Ol%C3%A1!%20Quero%20fazer%20a%20inscri%C3%A7%C3%A3o%20na%20Formatura%20Terceir%C3%A3o%20Aprovado%202026</code>
         <button onclick="copiarLinkPublico()" class="bg-[#E90064] hover:bg-[#D8005A] text-white text-xs font-bold px-3 py-1.5 rounded-lg whitespace-nowrap ml-2">
           Copiar Link
         </button>
@@ -1290,7 +1290,121 @@
 
   <!-- JAVASCRIPT GERAL -->
   <script>
-    let FORMANDOS = [{"num": 1, "nome": "Ana Almada Coli de Sá", "resp": "Raquel Almada", "tel": "(22) 99915-7206", "cpf": "068.567.657-97", "email": "raqalmada@gmail.com", "forma": "Boleto", "contrato": "ok", "pago": 3498.58, "falta": 491.42, "status": "em_andamento", "status_label": "Em Andamento", "badge_class": "bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300"}, {"num": 2, "nome": "Ana Beatriz de Castro Dias", "resp": "Tiago Dias da Silva", "tel": "(84) 99655-5781", "cpf": "013.594.884-30", "email": "Tiagodias_mo@hotmail.com", "forma": "Boleto", "contrato": "sim", "pago": 0.0, "falta": 3990.0, "status": "sem_pagamento", "status_label": "Contrato assinado, sem pgto", "badge_class": "bg-sky-100 text-sky-800 dark:bg-sky-950 dark:text-sky-300"}, {"num": 3, "nome": "Ana Clara Oliveira Carvalho", "resp": "Girlane Oliveira Andrade de Carvalho", "tel": "(22) 98119-7876", "cpf": "902.395.474-20", "email": "girlanecarvalho@yahoo.com.br", "forma": "Boleto/Pix", "contrato": "ok", "pago": 2270.0, "falta": 1720.0, "status": "em_andamento", "status_label": "Em Andamento", "badge_class": "bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300"}, {"num": 4, "nome": "Ana Clara Salim Carvalho", "resp": "Samira Salim Carvalho", "tel": "(22) 99994-7540", "cpf": "002.537.096-01", "email": "samirasalim001@gmail.com", "forma": "Pix", "contrato": "ok", "pago": 3990.0, "falta": 0.0, "status": "quitado", "status_label": "QUITADO 🎓", "badge_class": "bg-[#CCFF00] text-gray-950 font-black"}, {"num": 5, "nome": "Ana Clara Vidal de Araújo", "resp": "Guilherme Ribeiro / Maria Leda", "tel": "(22) 99818-8148", "cpf": "007.190.927-36", "email": "gui.araujo70@gmail.com", "forma": "Pix", "contrato": "ok", "pago": 3990.0, "falta": 0.0, "status": "quitado", "status_label": "QUITADO 🎓", "badge_class": "bg-[#CCFF00] text-gray-950 font-black"}, {"num": 6, "nome": "Ana Luiza Esteves da Cunha", "resp": "Gleice Esteves", "tel": "(22) 98126-0306", "cpf": "055.084.407-47", "email": "gleice_esteves@hotmail.com", "forma": "Boleto", "contrato": "ok", "pago": 3560.0, "falta": 430.0, "status": "em_andamento", "status_label": "Em Andamento", "badge_class": "bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300"}, {"num": 7, "nome": "Antônio Fernandes Pagano", "resp": "Flavia de Miranda Fernandes", "tel": "(22) 98112-2238", "cpf": "069.374.377-81", "email": "Fonoclin.flavia@gmail.com", "forma": "Boleto", "contrato": "ok", "pago": 3990.0, "falta": 0.0, "status": "quitado", "status_label": "QUITADO 🎓", "badge_class": "bg-[#CCFF00] text-gray-950 font-black"}, {"num": 8, "nome": "Arthur Lima Mussel", "resp": "Letícia Maria Lima", "tel": "(22) 98108-2239", "cpf": "100.315.267-80", "email": "Leticia.mlima2020@gmail.com", "forma": "Boleto", "contrato": "ok", "pago": 3560.0, "falta": 430.0, "status": "em_andamento", "status_label": "Em Andamento", "badge_class": "bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300"}, {"num": 9, "nome": "Bruno Bueno", "resp": "Monica Alves da Silva", "tel": "(51) 98409-6080", "cpf": "132.373.008-60", "email": "monicaasilva2010@hotmail.com", "forma": "Pix", "contrato": "ok", "pago": 3990.0, "falta": 0.0, "status": "quitado", "status_label": "QUITADO 🎓", "badge_class": "bg-[#CCFF00] text-gray-950 font-black"}, {"num": 10, "nome": "Cecília Conde Cardoso", "resp": "Mayra Ribeiro Conde", "tel": "(22) 98137-4858", "cpf": "731.407.406-20", "email": "mayrarconde@gmail.com", "forma": "Pix", "contrato": "ok", "pago": 3170.0, "falta": 820.0, "status": "em_andamento", "status_label": "Em Andamento", "badge_class": "bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300"}, {"num": 11, "nome": "Christine Costa e Silva", "resp": "Christianne Costa e Silva", "tel": "(22) 99246-3234", "cpf": "949.202.576-00", "email": "Christiannecs@gmail.com", "forma": "Boleto", "contrato": "ok", "pago": 3990.0, "falta": 0.0, "status": "quitado", "status_label": "QUITADO 🎓", "badge_class": "bg-[#CCFF00] text-gray-950 font-black"}, {"num": 12, "nome": "Cláudio Henrique Dutra S. Maciel", "resp": "Suellen Dutra Siqueira", "tel": "(22) 99991-7939", "cpf": "089.161.467-20", "email": "suellendutra@gmail.com", "forma": "Boleto", "contrato": "ok", "pago": 4872.5, "falta": 617.5, "status": "em_andamento", "status_label": "Em Andamento", "badge_class": "bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300"}, {"num": 13, "nome": "Daniela Bueno Paim Pamplona", "resp": "Daniel Paim / Marta", "tel": "(35) 99107-5414", "cpf": "046.612.206-33", "email": "paim.marta@yahoo.com.br", "forma": "Pix", "contrato": "Sim", "pago": 3560.0, "falta": 430.0, "status": "em_andamento", "status_label": "Em Andamento", "badge_class": "bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300"}, {"num": 14, "nome": "Davi Marques Defanti", "resp": "Manuella A. M. Defanti", "tel": "(22) 99892-8770", "cpf": "079.101.627-74", "email": "manumarques_222@hotmail.com", "forma": "Pix", "contrato": "ok", "pago": 3560.0, "falta": 430.0, "status": "em_andamento", "status_label": "Em Andamento", "badge_class": "bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300"}, {"num": 15, "nome": "Davi Ribeiro Corga", "resp": "Cleice Bichara Ribeiro", "tel": "(22) 99843-2617", "cpf": "003.588.507-62", "email": "cleice.bichara@gmail.com", "forma": "Pix", "contrato": "ok", "pago": 2470.0, "falta": 2120.0, "status": "em_andamento", "status_label": "Em Andamento", "badge_class": "bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300"}, {"num": 16, "nome": "Gabriel Louredo Rodrigues", "resp": "Renata M. Louredo Rodrigues", "tel": "(22) 99265-4728", "cpf": "075.561.757-66", "email": "Relouredorodrigues@me.com", "forma": "Pix", "contrato": "ok", "pago": 3990.0, "falta": 0.0, "status": "quitado", "status_label": "QUITADO 🎓", "badge_class": "bg-[#CCFF00] text-gray-950 font-black"}, {"num": 17, "nome": "Gabriela Peixoto", "resp": "Anna Carolina G. de Souza", "tel": "(22) 99800-9968", "cpf": "051.386.217-00", "email": "annaksouza19@gmail.com", "forma": "Pix", "contrato": "Sim", "pago": 3560.0, "falta": 430.0, "status": "em_andamento", "status_label": "Em Andamento", "badge_class": "bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300"}, {"num": 18, "nome": "Guilherme Arendt Rego", "resp": "Andre de Oliveira Rego", "tel": "(22) 99941-7227", "cpf": "042.969.107-60", "email": "andrerego@gmail.com", "forma": "Pix", "contrato": "Sim", "pago": 3560.0, "falta": 430.0, "status": "em_andamento", "status_label": "Em Andamento", "badge_class": "bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300"}, {"num": 19, "nome": "Heitor Mendonça de Oliveira", "resp": "Karla Livramento Mendonça", "tel": "(22) 98156-1369", "cpf": "082.065.857-02", "email": "kllimenso@gmail.com", "forma": "Boleto", "contrato": "sim", "pago": 0.0, "falta": 3990.0, "status": "sem_pagamento", "status_label": "Contrato assinado, sem pgto", "badge_class": "bg-sky-100 text-sky-800 dark:bg-sky-950 dark:text-sky-300"}, {"num": 20, "nome": "Isabella Cordeiro de Araujo", "resp": "Marcello Oliveira de Araujo", "tel": "(22) 99254-2081", "cpf": "020.758.427-36", "email": "ma@mfender.com.br", "forma": "Pix", "contrato": "ok", "pago": 3990.0, "falta": 0.0, "status": "quitado", "status_label": "QUITADO 🎓", "badge_class": "bg-[#CCFF00] text-gray-950 font-black"}, {"num": 21, "nome": "Isabella Neves de Souza", "resp": "Daniel Barbosa de Souza Jr", "tel": "(21) 99909-7164", "cpf": "035.142.317-61", "email": "danieljunior@uol.com.br", "forma": "Boleto", "contrato": "pendente", "pago": 3302.0, "falta": 688.0, "status": "sem_contrato", "status_label": "Pgto feito, sem contrato", "badge_class": "bg-amber-100 text-amber-900 dark:bg-amber-950 dark:text-amber-300"}, {"num": 22, "nome": "João Pedro Pacheco Passos", "resp": "Patrícia Pacheco", "tel": "(22) 98131-8143", "cpf": "103.919.297-12", "email": "patriciadvogada@gmail.com", "forma": "Boleto", "contrato": "ok", "pago": 1330.0, "falta": 2660.0, "status": "desistencia", "status_label": "Desistência (Não Concluiu)", "badge_class": "bg-gray-200 text-gray-700 dark:bg-gray-800 dark:text-gray-400"}, {"num": 23, "nome": "João Pedro Rezende de Albuquerque", "resp": "Rachel Rezende / Renato", "tel": "(22) 98829-9925", "cpf": "030.090.296-40", "email": "renatoalbuquerque76@hotmail.com", "forma": "Pix", "contrato": "ok", "pago": 3990.0, "falta": 0.0, "status": "quitado", "status_label": "QUITADO 🎓", "badge_class": "bg-[#CCFF00] text-gray-950 font-black"}, {"num": 24, "nome": "Julia Dominguez Máximo", "resp": "Alessandra de Azevedo Dominguez", "tel": "(22) 99256-9014", "cpf": "077.611.117-58", "email": "dominguezalessandra@gmail.com", "forma": "Pix", "contrato": "ok", "pago": 4590.0, "falta": 0.0, "status": "quitado", "status_label": "QUITADO 🎓", "badge_class": "bg-[#CCFF00] text-gray-950 font-black"}, {"num": 25, "nome": "Lara Garcia Escamilha", "resp": "Marceli Ninise Garcia", "tel": "(22) 99736-4885", "cpf": "093.052.497-79", "email": "garciaescamilha@gmail.com", "forma": "Boleto", "contrato": "ok", "pago": 3130.0, "falta": 860.0, "status": "em_andamento", "status_label": "Em Andamento", "badge_class": "bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300"}, {"num": 26, "nome": "Larissa Bastos", "resp": "Rossy Moreira Bastos Jr / Wania", "tel": "(22) 99975-6712", "cpf": "042.012.827-16", "email": "waniabastoswb@gmail.com", "forma": "Boleto", "contrato": "ok", "pago": 3990.0, "falta": 0.0, "status": "quitado", "status_label": "QUITADO 🎓", "badge_class": "bg-[#CCFF00] text-gray-950 font-black"}, {"num": 27, "nome": "Laura Domingues Reis", "resp": "Lucia Helena Domingues Reis", "tel": "(22) 98802-3716", "cpf": "018.288.177-67", "email": "Luciadomingues.reis@hotmail.com", "forma": "Pix", "contrato": "ok", "pago": 3560.0, "falta": 430.0, "status": "em_andamento", "status_label": "Em Andamento", "badge_class": "bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300"}, {"num": 28, "nome": "Lismar Palima", "resp": "Dismary Pérez", "tel": "(22) 99208-9379", "cpf": "71.923.283.162", "email": "Dismaryperez@gmail.com", "forma": "Link", "contrato": "pendente", "pago": 2270.0, "falta": 1720.0, "status": "sem_contrato", "status_label": "Pgto feito, sem contrato", "badge_class": "bg-amber-100 text-amber-900 dark:bg-amber-950 dark:text-amber-300"}, {"num": 29, "nome": "Lucas Sales Guimarães", "resp": "Armando Sales Machado Jr", "tel": "(22) 99235-3225", "cpf": "002.678.126-39", "email": "arsallesjr@yahoo.com", "forma": "Pix", "pendente": "pendente", "pago": 0.0, "falta": 0.0, "status": "desistencia", "status_label": "Desistência (Não Concluiu)", "badge_class": "bg-gray-200 text-gray-700 dark:bg-gray-800 dark:text-gray-400"}, {"num": 30, "nome": "Lucas Teixeira Pacheco", "resp": "Alessandra Marcondes", "tel": "(22) 99706-9991", "cpf": "078.032.177-45", "email": "alessamac@hotmail.com", "forma": "Boleto", "contrato": "ok", "pago": 3990.0, "falta": 0.0, "status": "quitado", "status_label": "QUITADO 🎓", "badge_class": "bg-[#CCFF00] text-gray-950 font-black"}, {"num": 31, "nome": "Luiz Henrique de Paiva Curado", "resp": "Luiz Carlos Curado", "tel": "(22) 99917-4403", "cpf": "442.052.797-87", "email": "lccurado@gmail.com", "forma": "Boleto", "contrato": "sim", "pago": 0.0, "falta": 3990.0, "status": "sem_pagamento", "status_label": "Contrato assinado, sem pgto", "badge_class": "bg-sky-100 text-sky-800 dark:bg-sky-950 dark:text-sky-300"}, {"num": 32, "nome": "Luiza Medeiros Stroligo", "resp": "Dayanna Medeiros Stroligo", "tel": "(22) 99838-8699", "cpf": "105.431.917-02", "email": "daystroligo@gmail.com", "forma": "Pix", "contrato": "ok", "pago": 3560.0, "falta": 430.0, "status": "em_andamento", "status_label": "Em Andamento", "badge_class": "bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300"}, {"num": 33, "nome": "Lukas Werner Gehring", "resp": "Juliana da Costa M. Gehring", "tel": "(22) 99971-4324", "cpf": "051.975.217-16", "email": "Ju.gehring@hotmail.com", "forma": "Pix", "contrato": "ok", "pago": 3130.0, "falta": 860.0, "status": "em_andamento", "status_label": "Em Andamento", "badge_class": "bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300"}, {"num": 34, "nome": "Maíra Mattos Malfetano", "resp": "Ieda Mattos Malfetano", "tel": "(22) 99774-9625", "cpf": "072.134.017-26", "email": "iedamattosm@outlook.com", "forma": "Boleto", "contrato": "ok", "pago": 3990.0, "falta": 0.0, "status": "quitado", "status_label": "QUITADO 🎓", "badge_class": "bg-[#CCFF00] text-gray-950 font-black"}, {"num": 35, "nome": "Mallu Santos Bevitori", "resp": "Taysa Cristina C. S. Bevitori", "tel": "(22) 99886-1122", "cpf": "607.648.132-34", "email": "taysa17@hotmail.com", "forma": "Boleto", "contrato": "ok", "pago": 3990.0, "falta": 0.0, "status": "quitado", "status_label": "QUITADO 🎓", "badge_class": "bg-[#CCFF00] text-gray-950 font-black"}, {"num": 36, "nome": "Manuela Rolemberg Castro", "resp": "Ana Beatriz Q. Rolemberg / Luiz", "tel": "(22) 99979-0858", "cpf": "121.346.397-17", "email": "biarolemberg@yahoo.com.br", "forma": "Boleto", "contrato": "ok", "pago": 2564.36, "falta": 1376.0, "status": "em_andamento", "status_label": "Em Andamento", "badge_class": "bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300"}, {"num": 37, "nome": "Marco Andrade Honório Neves", "resp": "Khenia Cristine Honório", "tel": "(22) 98100-1024", "cpf": "783.877.956-15", "email": "Khenia.honorio@gmail.com", "forma": "Pix", "contrato": "ok", "pago": 3990.0, "falta": 0.0, "status": "quitado", "status_label": "QUITADO 🎓", "badge_class": "bg-[#CCFF00] text-gray-950 font-black"}, {"num": 38, "nome": "Maria Eduarda Aguiar Felix", "resp": "Marcia Cristina Aguiar Felix", "tel": "(22) 98831-0402", "cpf": "125.351.247-77", "email": "aguiarfelixmarciacristina@gmail.com", "forma": "Boleto", "contrato": "pendente", "pago": 3988.0, "falta": 0.0, "status": "sem_contrato", "status_label": "Pgto feito, sem contrato", "badge_class": "bg-amber-100 text-amber-900 dark:bg-amber-950 dark:text-amber-300"}, {"num": 39, "nome": "Maria Fernanda de A. Azevedo", "resp": "Giuliana Isabela C. A. Azevedo", "tel": "(11) 92002-1024", "cpf": "055.215.877-13", "email": "lagiulian@gmail.com", "forma": "Boleto", "contrato": "Sim", "pago": 2610.0, "falta": 950.0, "status": "em_andamento", "status_label": "Em Andamento", "badge_class": "bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300"}, {"num": 40, "nome": "Maria Sophia Dantas de Oliveira", "resp": "João Batista de Oliveira Jr", "tel": "(84) 99924-3652", "cpf": "916.005.104-34", "email": "btjunior@gmail.com", "forma": "Pix", "contrato": "ok", "pago": 3130.0, "falta": 860.0, "status": "em_andamento", "status_label": "Em Andamento", "badge_class": "bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300"}, {"num": 41, "nome": "Mariana Figueiredo Leite", "resp": "Marcos Vinícius C. Leite", "tel": "(22) 99834-9834", "cpf": "090.709.927-01", "email": "Mark@mwf-services.com", "forma": "Pix", "contrato": "ok", "pago": 3990.0, "falta": 0.0, "status": "quitado", "status_label": "QUITADO 🎓", "badge_class": "bg-[#CCFF00] text-gray-950 font-black"}, {"num": 42, "nome": "Matheus Ferreira Madaleno", "resp": "André Luis F. Madaleno", "tel": "(22) 99954-6032", "cpf": "276.831.838-81", "email": "andre.madaleno@hotmail.com", "forma": "Link", "contrato": "ok", "pago": 3498.58, "falta": 491.43, "status": "em_andamento", "status_label": "Em Andamento", "badge_class": "bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300"}, {"num": 43, "nome": "Nathália Ramos de Azeredo", "resp": "Camile Ramos de Azeredo", "tel": "(22) 99956-9674", "cpf": "091.066.527-35", "email": "cazeredo23@yahoo.com.br", "forma": "Pix", "contrato": "ok", "pago": 3130.0, "falta": 860.0, "status": "em_andamento", "status_label": "Em Andamento", "badge_class": "bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300"}, {"num": 44, "nome": "Pedro Henrique Ávila Rizzo", "resp": "Simone da Silva Ávila Rizzo", "tel": "(22) 99289-1000", "cpf": "003.798.777-16", "email": "simonerizzo4@icloud.com", "forma": "Boleto", "contrato": "ok", "pago": 2700.0, "falta": 1290.0, "status": "em_andamento", "status_label": "Em Andamento", "badge_class": "bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300"}, {"num": 45, "nome": "Rafael Reis Said Furtado", "resp": "Getúlio Said Furtado / Rejane", "tel": "(22) 99221-8911", "cpf": "848.544.996-72", "email": "requerino@yahoo.com.br", "forma": "Boleto", "contrato": "ok", "pago": 3989.94, "falta": 0.0, "status": "quitado", "status_label": "QUITADO 🎓", "badge_class": "bg-[#CCFF00] text-gray-950 font-black"}, {"num": 46, "nome": "Rafaella dos Santos de Paula", "resp": "Elyzabeth Siqueira dos Santos", "tel": "(21) 99736-0956", "cpf": "042.854.387-12", "email": "elyzabethsiqueira567@gmail.com", "forma": "Pix", "contrato": "ok", "pago": 3560.0, "falta": 430.0, "status": "em_andamento", "status_label": "Em Andamento", "badge_class": "bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300"}, {"num": 47, "nome": "Vitória Luísa dos Santos C. M. de Azevedo", "resp": "Marcelo Mota de Azevedo", "tel": "(22) 99233-2710", "cpf": "075.696.997-26", "email": "azevedomm@yahoo.com.br", "forma": "Pix", "contrato": "pendente", "pago": 550.0, "falta": 3440.0, "status": "sem_contrato", "status_label": "Pgto feito, sem contrato", "badge_class": "bg-amber-100 text-amber-900 dark:bg-amber-950 dark:text-amber-300"}, {"num": 48, "nome": "Zany Gabriel Coutinho Franco", "resp": "Filipi de Abreu Franco", "tel": "(22) 99216-7804", "cpf": "092.177.807-40", "email": "francofilipi@gmail.com", "forma": "Boleto", "contrato": "ok", "pago": 3560.0, "falta": 430.0, "status": "em_andamento", "status_label": "Em Andamento", "badge_class": "bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300"}];
+    let FORMANDOS = [];
+    let TURMA_ATUAL = {
+      id: "b47c32b5-559d-4720-9dc4-192e2eb0234e",
+      saldo_santander: 58893.03,
+      saldo_cora: 37573.06
+    };
+
+    function escapeHtml(str) {
+      return String(str ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
+
+    function formatarMoedaBRL(valor) {
+      return (Number(valor) || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+    }
+
+    function obterMetaStatus(status) {
+      switch (status) {
+        case 'quitado':
+          return {
+            status_label: 'QUITADO 🎓',
+            badge_class: 'bg-[#CCFF00] text-gray-950 font-black'
+          };
+        case 'sem_contrato':
+          return {
+            status_label: 'Pgto feito, sem contrato',
+            badge_class: 'bg-amber-100 text-amber-900 dark:bg-amber-950 dark:text-amber-300'
+          };
+        case 'sem_pagamento':
+          return {
+            status_label: 'Contrato assinado, sem pgto',
+            badge_class: 'bg-sky-100 text-sky-800 dark:bg-sky-950 dark:text-sky-300'
+          };
+        case 'desistencia':
+          return {
+            status_label: 'Desistência (Não Concluiu)',
+            badge_class: 'bg-gray-200 text-gray-700 dark:bg-gray-800 dark:text-gray-400'
+          };
+        default:
+          return {
+            status_label: 'Em Andamento',
+            badge_class: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300'
+          };
+      }
+    }
+
+    function calcularDiasRestantesBaile() {
+      const dataEvento = new Date('2026-12-03T00:00:00-03:00');
+      const diff = dataEvento - new Date();
+      return Math.max(0, Math.ceil(diff / (1000 * 60 * 60 * 24)));
+    }
+
+    function atualizarTotaisKPIs() {
+      const lista = Array.isArray(FORMANDOS) ? FORMANDOS : [];
+      const ativos = lista.filter(f => f.status !== 'desistencia');
+      const qtdTotal = lista.length;
+      const qtdAtivos = ativos.length;
+      const qtdQuitado = lista.filter(f => f.status === 'quitado').length;
+      const qtdAndamento = lista.filter(f => f.status === 'em_andamento').length;
+      const qtdSemContrato = lista.filter(f => f.status === 'sem_contrato').length;
+      const qtdSemPagamento = lista.filter(f => f.status === 'sem_pagamento').length;
+      const qtdDesistencia = lista.filter(f => f.status === 'desistencia').length;
+
+      const somaPagoTodos = lista.reduce((acc, f) => acc + (Number(f.pago) || 0), 0);
+      const somaFaltaAtivos = ativos.reduce((acc, f) => acc + (Number(f.falta) || 0), 0);
+      const somaTotalAtivos = ativos.reduce((acc, f) => acc + (Number(f.total) || 3990), 0);
+      const pctArrecadado = somaTotalAtivos > 0 ? ((somaPagoTodos / somaTotalAtivos) * 100) : 0;
+
+      const santander = Number(TURMA_ATUAL?.saldo_santander) || 58893.03;
+      const cora = Number(TURMA_ATUAL?.saldo_cora) || 37573.06;
+      const saldoCaixa = santander + cora;
+
+      const setTxt = (id, txt) => {
+        const el = document.getElementById(id);
+        if (el) el.innerText = txt;
+      };
+
+      setTxt('kpiSubtituloTurma', `${qtdTotal} formandos mapeados • ${qtdAtivos} ativos na formatura • ${qtdDesistencia} desistências registradas.`);
+      setTxt('kpiTotalPago', formatarMoedaBRL(somaPagoTodos));
+      setTxt('kpiPctArrecadado', `${pctArrecadado.toFixed(1)}% do valor arrecadado`);
+      setTxt('kpiSaldoDisponivel', formatarMoedaBRL(saldoCaixa));
+      setTxt('kpiSaldoBancos', `Santander: ${formatarMoedaBRL(santander)} • Cora: ${formatarMoedaBRL(cora)}`);
+      setTxt('kpiAReceber', formatarMoedaBRL(somaFaltaAtivos));
+
+      setTxt('kpiQtdQuitado', String(qtdQuitado));
+      setTxt('kpiQtdAndamento', String(qtdAndamento));
+      setTxt('kpiQtdSemContrato', String(qtdSemContrato));
+      setTxt('kpiQtdSemPagamento', String(qtdSemPagamento));
+      setTxt('kpiQtdDesistencia', String(qtdDesistencia));
+
+      setTxt('optStatusQuitado', `Quitados 100% (${qtdQuitado})`);
+      setTxt('optStatusAndamento', `Em Andamento (${qtdAndamento})`);
+      setTxt('optStatusSemContrato', `Pgto s/ Contrato (${qtdSemContrato})`);
+      setTxt('optStatusSemPagamento', `Contrato s/ Pgto (${qtdSemPagamento})`);
+      setTxt('optStatusDesistencia', `Desistências (${qtdDesistencia})`);
+
+      setTxt('custosTotalPago', formatarMoedaBRL(somaPagoTodos));
+      setTxt('custosAReceber', `+ ${formatarMoedaBRL(somaFaltaAtivos)} a receber`);
+      setTxt('custosSaldoLiquido', formatarMoedaBRL(saldoCaixa));
+      setTxt('custosSaldoBancos', `Santander: ${formatarMoedaBRL(santander)} • Cora: ${formatarMoedaBRL(cora)}`);
+      setTxt('btnTextoCopiarWhatsApps', `Copiar Lista de WhatsApp dos Pais (${qtdTotal})`);
+    }
+
+    function filtrarFormandos(status) {
+      switchTab('formandos');
+      const sel = document.getElementById('statusFilter');
+      const search = document.getElementById('searchInput');
+      if (search) search.value = '';
+      if (sel) sel.value = status || 'todos';
+      filtrarTabela();
+    }
     
     // ==========================================
     // SUPABASE & AUTENTICAÇÃO DIRETORIA
@@ -1312,7 +1426,6 @@
           });
           console.log("✅ Supabase inicializado com sucesso!");
           atualizarStatusSupabaseUI(true);
-          sincronizarComSupabase();
         } catch(e) {
           console.error("Erro ao inicializar Supabase:", e);
           atualizarStatusSupabaseUI(false);
@@ -1384,7 +1497,7 @@
       }
     }
 
-    // LOGIN & SESSÃO
+    // LOGIN & SESSÃO (100% SUPABASE AUTH — SEM SENHAS HARDCODED)
     async function realizarLoginDiretoria(e) {
       if (e && e.preventDefault) e.preventDefault();
       const emailInput = document.getElementById('loginEmail');
@@ -1403,27 +1516,19 @@
       }
 
       const btn = document.getElementById('btnEntrarLogin');
-      const originalText = btn ? btn.innerHTML : 'Entrar no Sistema →';
-      if (btn) btn.innerHTML = `<span class="animate-spin text-sm">⏳</span><span>Acessando...</span>`;
-
-      // Validação das contas oficiais conhecidas (Login Imediato sem trava de rede)
-      const isMaria = email.toLowerCase() === 'mariamvpinheiro@gmail.com' && senha === '280307';
-      const isLuana = email.toLowerCase() === 'celebraeventosofc@gmail.com' && senha === 'Maria2803!';
-      const isMasterCelebra = senha.includes('Celebra');
-
-      if (isMaria || isLuana || isMasterCelebra) {
-        const diretora = isMaria || email.toLowerCase().includes('maria') || email.toLowerCase().includes('pinheiro') || email.toLowerCase().includes('mv') ? 'maria' : 'luana';
-        concluirLoginSucesso(diretora, email);
-        if (supabaseClient) {
-          supabaseClient.auth.signInWithPassword({ email: email, password: senha }).catch(() => {});
-        }
-        return;
+      const originalText = '<span>Entrar no Sistema</span><span class="text-base">➜</span>';
+      if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = `<span class="animate-spin text-sm">⏳</span><span>Autenticando...</span>`;
       }
 
-      // Se for outra conta, autentica no Supabase com limite de 3.5 segundos
+      if (!supabaseClient) {
+        inicializarSupabase();
+      }
+
       if (supabaseClient) {
         try {
-          const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error('Tempo limite de conexão esgotado.')), 3500));
+          const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error('Tempo limite de conexão esgotado.')), 8000));
           const { data, error } = await Promise.race([
             supabaseClient.auth.signInWithPassword({ email: email, password: senha }),
             timeoutPromise
@@ -1431,31 +1536,44 @@
 
           if (error) {
             if (erroEl) {
-              erroEl.innerText = "E-mail ou senha incorretos: " + (error.message || 'Verifique seus dados');
+              erroEl.innerText = "E-mail ou senha incorretos. Verifique suas credenciais da Diretoria.";
               erroEl.classList.remove('hidden');
             }
-            if (btn) btn.innerHTML = originalText;
+            if (btn) {
+              btn.disabled = false;
+              btn.innerHTML = originalText;
+            }
             return;
           }
 
-          let diretora = (email.toLowerCase().includes('maria') || email.toLowerCase().includes('pinheiro') || email.toLowerCase().includes('mv')) ? 'maria' : 'luana';
+          const diretora = (email.toLowerCase().includes('maria') || email.toLowerCase().includes('pinheiro') || email.toLowerCase().includes('mv')) ? 'maria' : 'luana';
           concluirLoginSucesso(diretora, email);
+          if (btn) {
+            btn.disabled = false;
+            btn.innerHTML = originalText;
+          }
           return;
         } catch(err) {
           console.warn("Aviso Auth Supabase:", err);
           if (erroEl) {
-            erroEl.innerText = "Erro ao conectar com o Supabase: " + (err.message || 'Tente novamente');
+            erroEl.innerText = "Erro ao conectar com o servidor: " + (err.message || 'Tente novamente');
             erroEl.classList.remove('hidden');
           }
-          if (btn) btn.innerHTML = originalText;
+          if (btn) {
+            btn.disabled = false;
+            btn.innerHTML = originalText;
+          }
           return;
         }
       } else {
         if (erroEl) {
-          erroEl.innerText = "Servidor de autenticação offline.";
+          erroEl.innerText = "Servidor de autenticação offline. Recarregue a página.";
           erroEl.classList.remove('hidden');
         }
-        if (btn) btn.innerHTML = originalText;
+        if (btn) {
+          btn.disabled = false;
+          btn.innerHTML = originalText;
+        }
       }
     }
 
@@ -1472,9 +1590,12 @@
         console.warn('Erro ao selecionar diretora:', e);
       }
 
-      // 1. Revela o painel principal imediatamente
+      // 1. Revela o painel principal imediatamente e carrega os dados reais
       const app = document.getElementById('appPrincipal');
       if (app) app.classList.remove('hidden');
+
+      sincronizarComSupabase();
+      sincronizarComprovantesWhatsApp();
 
       // 2. Anima e oculta a tela de login
       const card = document.getElementById('cardLoginBox');
@@ -1494,76 +1615,142 @@
       }
 
       try {
-        mostrarNotificacaoSwiftUI('Bem-vinda, ' + (diretora === 'luana' ? 'Luana' : 'Maria Clara'), 'Painel da Celebra Eventos pronto.', 'sucesso');
+        mostrarNotificacaoSwiftUI('Bem-vinda, ' + (diretora === 'luana' ? 'Luana' : 'Maria Clara'), 'Painel da Celebra Eventos sincronizado.', 'sucesso');
       } catch(e) {}
-    }
-
-    function loginRapido(diretora) {
-      const email = diretora === 'luana' ? 'luana@celebraeventos.com.br' : 'mariaclara@celebraeventos.com.br';
-      document.getElementById('loginEmail').value = email;
-      document.getElementById('loginSenha').value = 'Celebra@2026';
-      realizarLoginDiretoria(null);
     }
 
     function fazerLogout() {
       localStorage.removeItem('celebra_sessao_ativa');
+      localStorage.removeItem('celebra_usuario_logado');
+      localStorage.removeItem('celebra_email_logado');
       if (supabaseClient) {
         supabaseClient.auth.signOut().catch(() => {});
       }
-      document.getElementById('perfilDropdown').classList.add('hidden');
-      document.getElementById('telaLogin').classList.remove('hidden');
-      document.getElementById('appPrincipal').classList.add('hidden');
-    }
+      const dropdown = document.getElementById('perfilDropdown');
+      if (dropdown) dropdown.classList.add('hidden');
 
-    function verificarSessaoInicial() {
-      const sessaoAtiva = localStorage.getItem('celebra_sessao_ativa');
-      if (sessaoAtiva === 'true') {
-        const user = localStorage.getItem('celebra_usuario_logado') || 'luana';
-        selecionarDiretora(user);
-        const card = document.getElementById('cardLoginBox'); if(card) card.style.transform = 'translateY(-30px) scale(0.96)'; card.style.opacity = '0'; setTimeout(() => { document.getElementById('telaLogin').classList.add('hidden'); mostrarNotificacaoSwiftUI('Bem-vinda, ' + (user === 'luana' ? 'Luana' : 'Maria Clara'), 'Painel da Celebra Eventos pronto.', 'sucesso'); }, 400);
-        document.getElementById('appPrincipal').classList.remove('hidden');
-      } else {
-        document.getElementById('telaLogin').classList.remove('hidden');
-        document.getElementById('appPrincipal').classList.add('hidden');
+      const app = document.getElementById('appPrincipal');
+      if (app) app.classList.add('hidden');
+
+      const tela = document.getElementById('telaLogin');
+      const card = document.getElementById('cardLoginBox');
+      const btn = document.getElementById('btnEntrarLogin');
+      const senhaInput = document.getElementById('loginSenha');
+      if (senhaInput) senhaInput.value = '';
+      if (btn) {
+        btn.disabled = false;
+        btn.innerHTML = '<span>Entrar no Sistema</span><span class="text-base">➜</span>';
+      }
+      if (tela) {
+        tela.style.display = '';
+        tela.style.opacity = '1';
+        tela.classList.remove('hidden');
+      }
+      if (card) {
+        card.style.transform = '';
+        card.style.opacity = '1';
       }
     }
 
-    // SINCRONIZAÇÃO EM TEMPO REAL COM O SUPABASE POSTGRESQL (VIA REST API NATIVA)
+    async function verificarSessaoInicial() {
+      const tela = document.getElementById('telaLogin');
+      const app = document.getElementById('appPrincipal');
+
+      let sessaoValida = false;
+      let emailSessao = localStorage.getItem('celebra_email_logado') || '';
+
+      if (supabaseClient) {
+        try {
+          const { data } = await supabaseClient.auth.getSession();
+          if (data?.session?.user) {
+            sessaoValida = true;
+            emailSessao = data.session.user.email || emailSessao;
+          }
+        } catch(e) {
+          console.warn('Aviso getSession:', e);
+        }
+      }
+
+      if (sessaoValida) {
+        const user = (emailSessao.toLowerCase().includes('maria') || emailSessao.toLowerCase().includes('pinheiro') || emailSessao.toLowerCase().includes('mv')) ? 'maria' : (localStorage.getItem('celebra_usuario_logado') || 'luana');
+        selecionarDiretora(user);
+        if (tela) {
+          tela.classList.add('hidden');
+          tela.style.display = 'none';
+        }
+        if (app) app.classList.remove('hidden');
+        await sincronizarComSupabase();
+        sincronizarComprovantesWhatsApp();
+      } else {
+        localStorage.removeItem('celebra_sessao_ativa');
+        if (tela) {
+          tela.style.display = '';
+          tela.style.opacity = '1';
+          tela.classList.remove('hidden');
+        }
+        if (app) app.classList.add('hidden');
+      }
+    }
+
+    // SINCRONIZAÇÃO EM TEMPO REAL COM O SUPABASE POSTGRESQL
     async function sincronizarComSupabase() {
       const key = SUPABASE_ANON_KEY || "sb_publishable_GPBZkeBWljCdCnzf-1MH7w_yuR2JWPw";
       try {
-        const res = await fetch("https://ddehyuertafctuhnfgpn.supabase.co/rest/v1/formandos?select=*&order=num.asc", {
-          headers: {
-            'apikey': key,
-            'Authorization': 'Bearer ' + key
+        const [resFormandos, resTurmas] = await Promise.all([
+          fetch(`${SUPABASE_URL}/rest/v1/formandos?select=*&order=num.asc`, {
+            headers: { 'apikey': key, 'Authorization': 'Bearer ' + key }
+          }),
+          fetch(`${SUPABASE_URL}/rest/v1/turmas?select=*&limit=1`, {
+            headers: { 'apikey': key, 'Authorization': 'Bearer ' + key }
+          })
+        ]);
+
+        if (resTurmas.ok) {
+          const turmas = await resTurmas.json();
+          if (Array.isArray(turmas) && turmas.length > 0) {
+            TURMA_ATUAL = turmas[0];
           }
-        });
-        if (res.ok) {
-          const data = await res.json();
-          if (data && data.length > 0) {
-            FORMANDOS = data.map(f => ({
-              num: f.num || 1,
-              nome: f.nome,
-              resp: f.responsavel,
-              tel: f.contato || '',
-              cpf: f.cpf || '',
-              email: f.email || '',
-              forma: f.forma_pagamento || 'Boleto',
-              total: parseFloat(f.valor_total) || 3990,
-              pago: parseFloat(f.valor_pago) || 0,
-              falta: parseFloat(f.valor_falta) || 0,
-              status: f.status || 'em_andamento'
-            }));
-            renderizarTabela(FORMANDOS);
-    renderizarEsteira();
-            console.log(`✅ SUCESSO: ${data.length} formandos carregados ao vivo do Supabase PostgreSQL!`);
+        }
+
+        if (resFormandos.ok) {
+          const data = await resFormandos.json();
+          if (Array.isArray(data)) {
+            FORMANDOS = data.map(f => {
+              const statusNorm = f.status || 'em_andamento';
+              const meta = obterMetaStatus(statusNorm);
+              return {
+                id: f.id,
+                num: f.num || f.id,
+                nome: f.nome || '',
+                resp: f.responsavel || '',
+                responsavel: f.responsavel || '',
+                tel: f.contato || '',
+                cpf: f.cpf || '',
+                email: f.email || '',
+                forma: f.forma_pagamento || 'Boleto',
+                contrato: f.contrato_assinado || 'pendente',
+                total: parseFloat(f.valor_total) || 3990,
+                pago: parseFloat(f.valor_pago) || 0,
+                falta: parseFloat(f.valor_falta) || 0,
+                status: statusNorm,
+                status_label: meta.status_label,
+                badge_class: meta.badge_class
+              };
+            });
+            renderTabela(FORMANDOS);
+            renderRemarketing();
+            atualizarTotaisKPIs();
+            renderizarEsteira();
             atualizarStatusSupabaseUI(true);
+            console.log(`✅ ${data.length} formandos sincronizados ao vivo do Supabase!`);
           }
         } else {
-          console.warn("Status Supabase:", res.status);
+          console.warn("Status Supabase:", resFormandos.status);
+          atualizarStatusSupabaseUI(false);
         }
       } catch(e) {
         console.warn("Aviso ao buscar dados do Supabase:", e);
+        atualizarStatusSupabaseUI(false);
       }
     }
 
@@ -1691,43 +1878,92 @@
     }
 
     function copiarLinkPublico() {
-      navigator.clipboard.writeText("https://celebra-crm.vercel.app/inscricao/aprovado-2025");
-      mostrarNotificacaoSwiftUI('Link Copiado', 'Link do formulário copiado para o WhatsApp!', 'sucesso')
+      const link = document.getElementById('linkPublicoTexto')?.innerText?.trim() || "https://wa.me/5522933008137?text=Ol%C3%A1!%20Quero%20fazer%20a%20inscri%C3%A7%C3%A3o%20na%20Formatura%20Terceir%C3%A3o%20Aprovado%202026";
+      navigator.clipboard.writeText(link).catch(() => {});
+      mostrarNotificacaoSwiftUI('Link Copiado', 'Link oficial de inscrição copiado para o WhatsApp!', 'sucesso');
     }
 
-    function salvarNovoFormandoManual(e) {
+    function copiarChavePixOficial() {
+      const chavePix = '50.130.618/0001-44';
+      navigator.clipboard.writeText(chavePix).catch(() => {});
+      mostrarNotificacaoSwiftUI('Chave Pix Copiada', `CNPJ ${chavePix} copiado para a área de transferência!`, 'sucesso');
+    }
+
+    function abrirWhatsAppResponsavel(tel, nomeResp, nomeAluno, modo = 'financeiro') {
+      const digitos = String(tel || '').replace(/\D/g, '');
+      if (digitos.length < 8) {
+        mostrarNotificacaoSwiftUI('Telefone Indisponível', 'Este cadastro não possui um número de WhatsApp válido.', 'aviso');
+        return;
+      }
+      const numeroCompleto = digitos.startsWith('55') ? digitos : `55${digitos}`;
+      const primeiroNome = String(nomeResp || '').split('/')[0].trim().split(' ')[0] || '';
+      const saudacao = primeiroNome ? `Olá, ${primeiroNome}!` : 'Olá!';
+      const msg = modo === 'remarketing'
+        ? `${saudacao} Aqui é da Celebra Eventos! Tudo bem? Passando para agradecer a parceria na formatura de ${nomeAluno} e deixar nosso contato à disposição para futuros eventos da família.`
+        : `${saudacao} Aqui é a equipe financeira da Celebra Eventos, entrando em contato sobre a formatura de ${nomeAluno}.`;
+      const url = `https://wa.me/${numeroCompleto}?text=${encodeURIComponent(msg)}`;
+      window.open(url, '_blank', 'noopener,noreferrer');
+      mostrarNotificacaoSwiftUI('WhatsApp Aberto', `Conversa iniciada com ${nomeResp || numeroCompleto}.`, 'sucesso');
+    }
+
+    async function salvarNovoFormandoManual(e) {
       e.preventDefault();
-      const nome = document.getElementById('novoNomeAluno').value;
-      const resp = document.getElementById('novoNomeResp').value;
-      const tel = document.getElementById('novoTel').value;
-      const cpf = document.getElementById('novoCpf').value || '000.000.000-00';
+      const nome = document.getElementById('novoNomeAluno').value.trim();
+      const resp = document.getElementById('novoNomeResp').value.trim();
+      const tel = document.getElementById('novoTel').value.trim();
+      const cpf = document.getElementById('novoCpf').value.trim() || '';
       const valor = parseFloat(document.getElementById('novoValor').value) || 3990;
       const forma = document.getElementById('novoForma').value;
 
-      const novo = {
-        num: FORMANDOS.length + 1,
-        nome: nome,
-        resp: resp,
-        tel: tel,
-        cpf: cpf,
-        email: 'contato@familia.com',
-        forma: forma,
-        contrato: 'ok',
-        pago: 0,
-        falta: valor,
-        status: 'em_andamento',
-        status_label: 'Novo Cadastro',
-        badge_class: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300'
+      if (!nome || !resp) {
+        mostrarNotificacaoSwiftUI('Dados Incompletos', 'Preencha o nome do formando e do responsável.', 'aviso');
+        return;
+      }
+
+      const proximoNum = FORMANDOS.reduce((max, f) => Math.max(max, Number(f.num) || 0), 0) + 1;
+      const payloadDb = {
+        turma_id: TURMA_ATUAL?.id || 'b47c32b5-559d-4720-9dc4-192e2eb0234e',
+        num: proximoNum,
+        nome,
+        responsavel: resp,
+        contato: tel,
+        cpf: cpf || null,
+        forma_pagamento: forma,
+        contrato_assinado: 'pendente',
+        valor_total: valor,
+        valor_pago: 0,
+        valor_falta: valor,
+        status: 'sem_pagamento'
       };
 
-      FORMANDOS.unshift(novo);
-      renderTabela(FORMANDOS);
-      renderRemarketing();
-      fecharModal('modalNovoFormando');
-      mostrarNotificacaoSwiftUI("Formando Cadastrado", nome + " cadastrado com sucesso!", "sucesso");
+      try {
+        const key = SUPABASE_ANON_KEY || "sb_publishable_GPBZkeBWljCdCnzf-1MH7w_yuR2JWPw";
+        const res = await fetch(`${SUPABASE_URL}/rest/v1/formandos`, {
+          method: 'POST',
+          headers: {
+            'apikey': key,
+            'Authorization': 'Bearer ' + key,
+            'Content-Type': 'application/json',
+            'Prefer': 'return=representation'
+          },
+          body: JSON.stringify(payloadDb)
+        });
+
+        if (!res.ok) {
+          throw new Error(`HTTP ${res.status}`);
+        }
+
+        await sincronizarComSupabase();
+        e.target.reset();
+        fecharModal('modalNovoFormando');
+        mostrarNotificacaoSwiftUI("Formando Salvo no Banco!", `${nome} cadastrado permanentemente no Supabase!`, "sucesso");
+      } catch (err) {
+        console.error("Erro ao salvar novo formando:", err);
+        mostrarNotificacaoSwiftUI("Erro ao Salvar", "Não foi possível gravar no Supabase. Tente novamente.", "erro");
+      }
     }
 
-    function enviarComandoCopiloto() {
+    async function enviarComandoCopiloto() {
       const input = document.getElementById('chatInput');
       const txt = input.value.trim();
       if (!txt) return;
@@ -1736,91 +1972,146 @@
       hist.innerHTML += `
         <div class="flex items-start justify-end space-x-2">
           <div class="bg-[#E90064] text-white p-2.5 rounded-xl rounded-tr-none text-right">
-            ${txt}
+            ${escapeHtml(txt)}
           </div>
         </div>
       `;
       input.value = '';
+      hist.scrollTop = hist.scrollHeight;
 
-      setTimeout(() => {
-        let nomeAluno = "Juliano Souza";
-        let nomeResp = "Gabriela Lannes";
+      // Extração estruturada real (sem mock fixo!)
+      const mAluno = txt.match(/(?:cadastr[ae]r?|adicionar?|novo(?:\s+formando)?)\s+(?:o\s+|a\s+)?([^,.;]+?)(?=\s*,\s*(?:resp|m[ãa]e|pai)|$)/i);
+      const mResp = txt.match(/(?:respons[áa]vel|m[ãa]e|pai)\s*:?\s*([^,.;]+?)(?=\s*,\s*(?:tel|whats|cpf|plano|valor)|$)/i);
+      const mTel = txt.match(/(\(?\d{2}\)?\s*9?\d{4}[-.\s]?\d{4})/);
+      const mValor = txt.match(/(?:r\$\s*|valor\s*(?:de\s*)?)(\d+(?:[.,]\d{1,2})?)/i);
 
-        const novo = {
-          num: FORMANDOS.length + 1,
-          nome: nomeAluno,
-          resp: nomeResp,
-          tel: '(22) 99876-5432',
-          cpf: '109.876.543-21',
-          email: 'gabi.lannes@gmail.com',
-          forma: 'Pix',
-          contrato: 'ok',
-          pago: 0,
-          falta: 3990,
-          status: 'em_andamento',
-          status_label: 'Via Copiloto IA',
-          badge_class: 'bg-purple-100 text-purple-800 dark:bg-purple-950 dark:text-purple-300'
-        };
+      const nomeAluno = mAluno ? mAluno[1].trim() : '';
+      const nomeResp = mResp ? mResp[1].trim() : '';
+      const tel = mTel ? mTel[1].trim() : '';
+      const valor = mValor ? parseFloat(mValor[1].replace('.', '').replace(',', '.')) || 3990 : 3990;
 
-        FORMANDOS.unshift(novo);
-        renderTabela(FORMANDOS);
-        renderRemarketing();
+      if (!nomeAluno || !nomeResp) {
+        hist.innerHTML += `
+          <div class="flex items-start space-x-2">
+            <div class="w-6 h-6 rounded-full bg-gradient-to-r from-purple-600 to-indigo-600 text-white flex items-center justify-center text-[10px] font-bold shrink-0">IA</div>
+            <div class="bg-white dark:bg-gray-800 p-2.5 rounded-xl rounded-tl-none border border-gray-200 dark:border-gray-700 text-gray-800 dark:text-gray-200">
+              Para cadastrar no banco com segurança, informe pelo menos o <strong>nome do aluno</strong> e o <strong>responsável</strong>. Exemplo:<br>
+              <em class="text-[#E90064]">"Cadastrar Lucas Silva, responsável Maria Silva, tel (22) 99999-0000, valor 3990"</em>
+            </div>
+          </div>
+        `;
+        hist.scrollTop = hist.scrollHeight;
+        return;
+      }
+
+      try {
+        const proximoNum = FORMANDOS.reduce((max, f) => Math.max(max, Number(f.num) || 0), 0) + 1;
+        const key = SUPABASE_ANON_KEY || "sb_publishable_GPBZkeBWljCdCnzf-1MH7w_yuR2JWPw";
+        const res = await fetch(`${SUPABASE_URL}/rest/v1/formandos`, {
+          method: 'POST',
+          headers: {
+            'apikey': key,
+            'Authorization': 'Bearer ' + key,
+            'Content-Type': 'application/json',
+            'Prefer': 'return=representation'
+          },
+          body: JSON.stringify({
+            turma_id: TURMA_ATUAL?.id || 'b47c32b5-559d-4720-9dc4-192e2eb0234e',
+            num: proximoNum,
+            nome: nomeAluno,
+            responsavel: nomeResp,
+            contato: tel,
+            forma_pagamento: 'Pix',
+            contrato_assinado: 'pendente',
+            valor_total: valor,
+            valor_pago: 0,
+            valor_falta: valor,
+            status: 'sem_pagamento'
+          })
+        });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        await sincronizarComSupabase();
 
         hist.innerHTML += `
           <div class="flex items-start space-x-2">
             <div class="w-6 h-6 rounded-full bg-gradient-to-r from-purple-600 to-indigo-600 text-white flex items-center justify-center text-[10px] font-bold shrink-0">IA</div>
             <div class="bg-white dark:bg-gray-800 p-2.5 rounded-xl rounded-tl-none border border-gray-200 dark:border-gray-700 text-gray-800 dark:text-gray-200">
-              ✅ Entendido! Cadastrei o formando <strong>${nomeAluno}</strong> com a responsável <strong>${nomeResp}</strong> na turma. O plano de R$ 3.990 já está lançado no sistema!
+              ✅ Gravado no Supabase! Cadastrei <strong>${escapeHtml(nomeAluno)}</strong> (Responsável: <strong>${escapeHtml(nomeResp)}</strong>${tel ? ` • ${escapeHtml(tel)}` : ''}) com plano de <strong>${formatarMoedaBRL(valor)}</strong>.
             </div>
           </div>
         `;
-        hist.scrollTop = hist.scrollHeight;
-      }, 800);
+      } catch (err) {
+        hist.innerHTML += `
+          <div class="flex items-start space-x-2">
+            <div class="w-6 h-6 rounded-full bg-rose-600 text-white flex items-center justify-center text-[10px] font-bold shrink-0">!</div>
+            <div class="bg-white dark:bg-gray-800 p-2.5 rounded-xl rounded-tl-none border border-rose-300 text-rose-600">
+              ❌ Erro ao gravar no Supabase (${escapeHtml(err.message)}). Tente pelo botão "+ Novo Formando Manual".
+            </div>
+          </div>
+        `;
+      }
+      hist.scrollTop = hist.scrollHeight;
     }
 
     function renderTabela(lista) {
       const tbody = document.getElementById('tbodyFormandos');
       if (!tbody) return;
       tbody.innerHTML = '';
-      
+
+      if (!Array.isArray(lista) || lista.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="9" class="py-8 text-center text-xs text-gray-400">Nenhum formando encontrado para este filtro.</td></tr>`;
+        const counter = document.getElementById('counterRows');
+        if (counter) counter.innerText = 'Mostrando 0 de ' + FORMANDOS.length + ' formandos';
+        return;
+      }
+
       lista.forEach(f => {
         const tr = document.createElement('tr');
         tr.className = 'hover:bg-gray-50/80 dark:hover:bg-gray-800/50 transition-colors ' + (f.status === 'desistencia' ? 'bg-gray-100/50 dark:bg-gray-800/30 opacity-60' : '');
-        
-        const valorPagoFormatado = f.pago.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-        const faltaFormatado = f.falta > 0 ? f.falta.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }) : '—';
-        
+
+        const valorPagoFormatado = (Number(f.pago) || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+        const faltaFormatado = (Number(f.falta) || 0) > 0 ? Number(f.falta).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }) : '—';
+        const contratoStr = String(f.contrato || 'pendente');
+        const contratoOk = contratoStr.toLowerCase() === 'ok' || contratoStr.toLowerCase() === 'sim';
+        const meta = obterMetaStatus(f.status);
+        const badgeClass = f.badge_class || meta.badge_class;
+        const statusLabel = f.status_label || meta.status_label;
+
         tr.innerHTML = `
-          <td class="py-3 px-3 text-center font-bold text-gray-400 text-xs">${f.num}</td>
+          <td class="py-3 px-3 text-center font-bold text-gray-400 text-xs">${escapeHtml(f.num)}</td>
           <td class="py-3 px-4">
-            <div class="font-bold text-gray-900 dark:text-white text-xs">${f.nome}</div>
-            <div class="text-[11px] text-gray-500 dark:text-gray-400">Resp: <strong>${f.resp}</strong></div>
+            <div class="font-bold text-gray-900 dark:text-white text-xs">${escapeHtml(f.nome)}</div>
+            <div class="text-[11px] text-gray-500 dark:text-gray-400">Resp: <strong>${escapeHtml(f.resp || f.responsavel || '—')}</strong></div>
           </td>
           <td class="py-3 px-3">
-            <div class="text-xs text-gray-800 dark:text-gray-200 font-medium">${f.tel}</div>
-            <div class="text-[10px] text-gray-400">${f.cpf}</div>
+            <div class="text-xs text-gray-800 dark:text-gray-200 font-medium">${escapeHtml(f.tel || '—')}</div>
+            <div class="text-[10px] text-gray-400">${escapeHtml(f.cpf || '—')}</div>
           </td>
           <td class="py-3 px-3">
-            <span class="inline-block text-[11px] font-semibold text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-800 px-2 py-0.5 rounded-md">${f.forma}</span>
+            <span class="inline-block text-[11px] font-semibold text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-800 px-2 py-0.5 rounded-md">${escapeHtml(f.forma || '—')}</span>
           </td>
           <td class="py-3 px-3">
-            <span class="text-[11px] font-bold ${f.contrato.toLowerCase() === 'ok' || f.contrato.toLowerCase() === 'sim' ? 'text-emerald-700 dark:text-emerald-400' : 'text-amber-700 dark:text-amber-400'}">
-              ${f.contrato}
+            <span class="text-[11px] font-bold ${contratoOk ? 'text-emerald-700 dark:text-emerald-400' : 'text-amber-700 dark:text-amber-400'}">
+              ${escapeHtml(contratoStr)}
             </span>
           </td>
           <td class="py-3 px-3 font-bold text-gray-900 dark:text-white text-xs">${valorPagoFormatado}</td>
-          <td class="py-3 px-3 font-semibold ${f.falta > 0 ? 'text-rose-600 dark:text-rose-400' : 'text-gray-400'} text-xs">${faltaFormatado}</td>
+          <td class="py-3 px-3 font-semibold ${(Number(f.falta) || 0) > 0 ? 'text-rose-600 dark:text-rose-400' : 'text-gray-400'} text-xs">${faltaFormatado}</td>
           <td class="py-3 px-4 text-center">
-            <span class="inline-block text-[10px] px-2.5 py-1 rounded-full font-bold ${f.badge_class} shadow-sm">
-              ${f.status_label}
+            <span class="inline-block text-[10px] px-2.5 py-1 rounded-full font-bold ${badgeClass} shadow-sm">
+              ${escapeHtml(statusLabel)}
             </span>
           </td>
           <td class="py-3 px-3 text-right">
-            <button onclick="mostrarNotificacaoSwiftUI("WhatsApp", "Abrindo WhatsApp com " + "${f.resp}", "sucesso")" class="text-xs font-bold text-[#E90064] hover:underline">
+            <button type="button" class="btn-wpp-row text-xs font-bold text-[#E90064] hover:underline">
               WhatsApp
             </button>
           </td>
         `;
+        const btnWpp = tr.querySelector('.btn-wpp-row');
+        if (btnWpp) {
+          btnWpp.addEventListener('click', () => abrirWhatsAppResponsavel(f.tel, f.resp || f.responsavel, f.nome, 'financeiro'));
+        }
         tbody.appendChild(tr);
       });
 
@@ -1833,42 +2124,48 @@
       if (!cont) return;
       cont.innerHTML = '';
 
-      FORMANDOS.slice(0, 15).forEach(f => {
+      FORMANDOS.forEach(f => {
         const item = document.createElement('div');
         item.className = 'py-3 flex items-center justify-between flex-wrap gap-2';
         item.innerHTML = `
           <div>
-            <div class="text-xs font-bold text-gray-900 dark:text-white">${f.resp} (Mãe/Pai de ${f.nome})</div>
-            <div class="text-[11px] text-gray-500 dark:text-gray-400">WhatsApp: <strong>${f.tel}</strong> • E-mail: ${f.email}</div>
+            <div class="text-xs font-bold text-gray-900 dark:text-white">${escapeHtml(f.resp || f.responsavel || 'Responsável')} (Família de ${escapeHtml(f.nome)})</div>
+            <div class="text-[11px] text-gray-500 dark:text-gray-400">WhatsApp: <strong>${escapeHtml(f.tel || '—')}</strong> • E-mail: ${escapeHtml(f.email || '—')}</div>
           </div>
           <div class="flex items-center space-x-2">
             <span class="text-[10px] font-bold bg-emerald-50 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 px-2.5 py-0.5 rounded-full">
               Lead Futuro (Irmãos/Parentes)
             </span>
-            <button onclick="mostrarNotificacaoSwiftUI("Remarketing", "Mensagem pronta para " + "${f.resp}", "sucesso")" class="text-xs font-bold text-[#E90064] hover:underline">
+            <button type="button" class="btn-rmkt-row text-xs font-bold text-[#E90064] hover:underline">
               Mandar Mensagem
             </button>
           </div>
         `;
+        const btn = item.querySelector('.btn-rmkt-row');
+        if (btn) {
+          btn.addEventListener('click', () => abrirWhatsAppResponsavel(f.tel, f.resp || f.responsavel, f.nome, 'remarketing'));
+        }
         cont.appendChild(item);
       });
     }
 
     function copiarTodosWhatsApps() {
-      const numeros = FORMANDOS.map(f => f.tel).join('\n');
-      navigator.clipboard.writeText(numeros);
-      mostrarNotificacaoSwiftUI("Contatos Copiados", "48 números de WhatsApp copiados para a área de transferência!", "sucesso");
+      const numeros = FORMANDOS.map(f => f.tel).filter(Boolean);
+      navigator.clipboard.writeText(numeros.join('\n')).catch(() => {});
+      mostrarNotificacaoSwiftUI("Contatos Copiados", `${numeros.length} números de WhatsApp copiados para a área de transferência!`, "sucesso");
     }
 
     function filtrarTabela() {
-      const search = document.getElementById('searchInput').value.toLowerCase();
-      const status = document.getElementById('statusFilter').value;
+      const norm = (s) => String(s || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+      const search = norm(document.getElementById('searchInput')?.value || '');
+      const status = document.getElementById('statusFilter')?.value || 'todos';
 
       const filtrados = FORMANDOS.filter(f => {
-        const matchSearch = f.nome.toLowerCase().includes(search) || 
-                            f.resp.toLowerCase().includes(search) || 
-                            f.tel.includes(search) || 
-                            f.cpf.includes(search);
+        const matchSearch = !search ||
+                            norm(f.nome).includes(search) ||
+                            norm(f.resp || f.responsavel).includes(search) ||
+                            String(f.tel || '').includes(search) ||
+                            String(f.cpf || '').includes(search);
         const matchStatus = (status === 'todos') || (f.status === status);
         return matchSearch && matchStatus;
       });
@@ -2054,7 +2351,7 @@
       return (lista || []).filter(c => !processados.includes(c.id));
     }
 
-    let COMPROVANTES_ESTEIRA = obterFilaFiltrada(TODOS_COMPROVANTES_BASE);
+    let COMPROVANTES_ESTEIRA = [];
     let indiceComprovanteAtivo = 0;
 
     function renderizarEsteira() {
@@ -2299,9 +2596,14 @@
         // 1. Atualiza estado local com o formando EXATAMENTE selecionado (nunca por 1º nome!)
         formando.pago = Math.round(((formando.pago || 0) + valorFinal) * 100) / 100;
         formando.falta = Math.max(0, Math.round(((formando.total || 3990) - formando.pago) * 100) / 100);
-        if (formando.falta <= 0.01) formando.status = 'quitado';
-        renderizarTabela(FORMANDOS);
-        if (typeof atualizarTotaisKPIs === 'function') atualizarTotaisKPIs();
+        if (formando.falta <= 0.01) {
+          formando.status = 'quitado';
+          const meta = obterMetaStatus('quitado');
+          formando.status_label = meta.status_label;
+          formando.badge_class = meta.badge_class;
+        }
+        renderTabela(FORMANDOS);
+        atualizarTotaisKPIs();
 
         // 2. Persiste no Supabase (comprovante real via API ou demo via PATCH direto)
         try {
@@ -2474,15 +2776,25 @@
       if (!txt) return;
 
       const pendentesCount = COMPROVANTES_ESTEIRA.length;
+      const dias = calcularDiasRestantesBaile();
+      const ativos = FORMANDOS.filter(f => f.status !== 'desistencia');
+      const totalPago = FORMANDOS.reduce((acc, f) => acc + (Number(f.pago) || 0), 0);
+      const totalFalta = ativos.reduce((acc, f) => acc + (Number(f.falta) || 0), 0);
+      const totalContrato = ativos.reduce((acc, f) => acc + (Number(f.total) || 3990), 0);
+      const pct = totalContrato > 0 ? ((totalPago / totalContrato) * 100).toFixed(1) : '0.0';
+      const qtdQuitados = FORMANDOS.filter(f => f.status === 'quitado').length;
+      const qtdSemContrato = FORMANDOS.filter(f => f.status === 'sem_contrato').length;
+      const qtdAndamento = FORMANDOS.filter(f => f.status === 'em_andamento').length;
+      const saldoCaixa = (Number(TURMA_ATUAL?.saldo_santander) || 58893.03) + (Number(TURMA_ATUAL?.saldo_cora) || 37573.06);
 
       if (tipo === 'comprovante') {
         txt.value = `Olá, Diretoria Celebra! 🎓✨\n\nConstam ${pendentesCount > 0 ? pendentesCount : 'novos'} comprovante(s) Pix recebido(s) no WhatsApp aguardando sua conferência e aprovação na Esteira IA do Celebra CRM.\n\n🔗 Acesse para aprovar: https://celebra-crm.vercel.app\n\n— Notificação do Sistema Celebra CRM`;
       } else if (tipo === 'reta_final') {
-        txt.value = `Olá, Diretoria Celebra! ⏳🎉\n\nFaltam apenas 17 dias para o grande baile do Terceirão no Salão Nobre Guerrah Hall (3 de Dezembro)!\n\n📊 Status do Evento:\n• Total Arrecadado: R$ 151.653,96 (86.3%)\n• Formandos Quitados: 16 de 48\n• Saldo em Caixa Hoje: R$ 96.466,09\n\n🔗 Acompanhe o fluxo: https://celebra-crm.vercel.app\n\n— Notificação do Sistema Celebra CRM`;
+        txt.value = `Olá, Diretoria Celebra! ⏳🎉\n\nFaltam apenas ${dias} dias para o grande baile do Terceirão no Salão Nobre Guerrah Hall (3 de Dezembro)!\n\n📊 Status do Evento:\n• Total Arrecadado: ${formatarMoedaBRL(totalPago)} (${pct}%)\n• Formandos Quitados: ${qtdQuitados} de ${FORMANDOS.length}\n• Saldo em Caixa Hoje: ${formatarMoedaBRL(saldoCaixa)}\n\n🔗 Acompanhe o fluxo: https://celebra-crm.vercel.app\n\n— Notificação do Sistema Celebra CRM`;
       } else if (tipo === 'caixa') {
-        txt.value = `Resumo Financeiro Celebra Eventos 💰✨\n\n• Total Pago pelos Pais: R$ 151.653,96\n• Saldo Disponível Hoje: R$ 96.466,09 (Santander + Cora)\n• A Receber (Parcelas Finais): R$ 26.124,35\n\n🔗 Ver fechamento completo: https://celebra-crm.vercel.app\n\n— Notificação do Sistema Celebra CRM`;
+        txt.value = `Resumo Financeiro Celebra Eventos 💰✨\n\n• Total Pago pelos Pais: ${formatarMoedaBRL(totalPago)}\n• Saldo Disponível Hoje: ${formatarMoedaBRL(saldoCaixa)} (Santander + Cora)\n• A Receber (Parcelas Finais): ${formatarMoedaBRL(totalFalta)}\n\n🔗 Ver fechamento completo: https://celebra-crm.vercel.app\n\n— Notificação do Sistema Celebra CRM`;
       } else if (tipo === 'contratos') {
-        txt.value = `Atenção Diretoria! 📋⚠️\n\nAinda constam 4 formandos sem contrato assinado e 23 com parcelas finais em aberto para a formatura de 3 de Dezembro no Guerrah Hall.\n\n🔗 Cobrar responsáveis: https://celebra-crm.vercel.app\n\n— Notificação do Sistema Celebra CRM`;
+        txt.value = `Atenção Diretoria! 📋⚠️\n\nAinda constam ${qtdSemContrato} formandos sem contrato assinado e ${qtdAndamento} com parcelas finais em aberto para a formatura de 3 de Dezembro no Guerrah Hall.\n\n🔗 Cobrar responsáveis: https://celebra-crm.vercel.app\n\n— Notificação do Sistema Celebra CRM`;
       }
 
       atualizarCharCountNotif();
@@ -2543,27 +2855,64 @@
             'sucesso'
           );
         } else {
-          mostrarNotificacaoSwiftUI('Envio Realizado', `Disparo registrado para ${nomes.join(' e ')}.`, 'sucesso');
-          fecharModal('modalNotificarDiretoria');
+          const errJson = await res.json().catch(() => ({}));
+          mostrarNotificacaoSwiftUI('Falha no Envio', errJson.error || `Erro HTTP ${res.status} ao enviar pelo WhatsApp.`, 'erro');
         }
       } catch (err) {
-        console.warn('Aviso envio WhatsApp:', err);
-        mostrarNotificacaoSwiftUI('Envio Realizado', `Mensagem encaminhada para ${nomes.join(' e ')}.`, 'sucesso');
-        fecharModal('modalNotificarDiretoria');
+        console.warn('Erro envio WhatsApp:', err);
+        mostrarNotificacaoSwiftUI('Erro de Conexão', 'Não foi possível comunicar com o servidor de WhatsApp.', 'erro');
       } finally {
         if (btn) btn.innerHTML = originalText;
       }
     }
-function selectComprovanteReal(id) {
-      mostrarNotificacaoSwiftUI("Comprovante Selecionado", "Carregando detalhes do comprovante...", "sucesso");
-    }
 
-    function aprovarComprovanteRealClick() {
-      mostrarNotificacaoSwiftUI("Comprovante Aprovado", "Baixa realizada com sucesso no CRM!", "sucesso");
+    function baixarArquivoCSV(nomeArquivo, cabecalhos, linhas) {
+      const escapar = (v) => `"${String(v ?? '').replace(/"/g, '""')}"`;
+      const conteudo = '\uFEFF' + [
+        cabecalhos.map(escapar).join(';'),
+        ...linhas.map(row => row.map(escapar).join(';'))
+      ].join('\r\n');
+      const blob = new Blob([conteudo], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = nomeArquivo;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
     }
 
     function exportarCSVReal() {
-      mostrarNotificacaoSwiftUI("Exportação Concluída", "Planilha exportada com sucesso em Excel / CSV!", "sucesso");
+      if (!FORMANDOS.length) {
+        mostrarNotificacaoSwiftUI('Sem Dados', 'Aguarde o carregamento dos formandos antes de exportar.', 'aviso');
+        return;
+      }
+      baixarArquivoCSV(
+        `celebra-formandos-${new Date().toISOString().slice(0, 10)}.csv`,
+        ['#', 'Formando', 'Responsável', 'WhatsApp', 'CPF', 'E-mail', 'Forma', 'Contrato', 'Valor Total', 'Valor Pago', 'Falta', 'Status'],
+        FORMANDOS.map(f => [
+          f.num, f.nome, f.resp || f.responsavel, f.tel, f.cpf, f.email, f.forma, f.contrato,
+          (Number(f.total) || 0).toFixed(2).replace('.', ','),
+          (Number(f.pago) || 0).toFixed(2).replace('.', ','),
+          (Number(f.falta) || 0).toFixed(2).replace('.', ','),
+          f.status_label || f.status
+        ])
+      );
+      mostrarNotificacaoSwiftUI("Exportação Concluída", `Planilha com ${FORMANDOS.length} formandos baixada em CSV/Excel!`, "sucesso");
+    }
+
+    function exportarBaseRemarketingCSV() {
+      if (!FORMANDOS.length) {
+        mostrarNotificacaoSwiftUI('Sem Dados', 'Nenhum contato carregado ainda.', 'aviso');
+        return;
+      }
+      baixarArquivoCSV(
+        `celebra-contatos-remarketing-${new Date().toISOString().slice(0, 10)}.csv`,
+        ['Responsável', 'Formando', 'WhatsApp', 'E-mail', 'Status'],
+        FORMANDOS.map(f => [f.resp || f.responsavel, f.nome, f.tel, f.email, f.status_label || f.status])
+      );
+      mostrarNotificacaoSwiftUI('Base Exportada!', `${FORMANDOS.length} contatos baixados em CSV para campanhas!`, 'sucesso');
     }
 
     
@@ -2680,9 +3029,11 @@ function selectComprovanteReal(id) {
           { url: '/?tab=comprovantes' }
         );
       } else if (tipo === 'reta_final') {
+        const dias = calcularDiasRestantesBaile();
+        const totalPago = FORMANDOS.reduce((acc, f) => acc + (Number(f.pago) || 0), 0);
         dispararNotificacaoNativa(
           'Celebra Eventos • Reta Final ⏳',
-          'Faltam apenas 17 dias para a formatura no Salão Nobre Guerrah Hall! R$ 151.653 arrecadados.',
+          `Faltam apenas ${dias} dias para a formatura no Salão Nobre Guerrah Hall! ${formatarMoedaBRL(totalPago)} arrecadados.`,
           { url: '/' }
         );
       } else if (tipo === 'comprovante') {
@@ -2769,12 +3120,9 @@ document.addEventListener('DOMContentLoaded', () => {
         document.documentElement.classList.add('dark');
         atualizarIconesTema(true);
       }
-      renderTabela(FORMANDOS);
-      renderRemarketing();
-      selecionarDiretora('luana');
-          atualizarContador();
-    inicializarSupabase();
-    verificarSessaoInicial();
+      atualizarContador();
+      inicializarSupabase();
+      verificarSessaoInicial();
     });
   </script>
 </body>

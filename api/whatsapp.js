@@ -10,7 +10,9 @@ const EVOLUTION_URL = process.env.EVOLUTION_URL || "https://evolution-api-produc
 const EVOLUTION_API_KEY = process.env.EVOLUTION_API_KEY || "b49b711585c3bb5525906424fbf7871d712810afdd95719a228a6b3f8b830594";
 const INSTANCE_NAME = process.env.INSTANCE_NAME || "celebra-eventos";
 
-const GEMINI_MODELS = ["gemini-4-hydrogen", "gemini-3.5-flash-lite"];
+const GEMINI_MODELS = process.env.GEMINI_MODEL
+  ? [process.env.GEMINI_MODEL, "gemini-3.5-flash-lite", "gemini-4-hydrogen"]
+  : ["gemini-3.5-flash-lite", "gemini-4-hydrogen"];
 const DATA_FORMATURA_ISO = "2026-12-03";
 const SAUDACAO_COOLDOWN_HORAS = 12;
 
@@ -189,6 +191,7 @@ export default async function handler(req, res) {
         });
       }
 
+      const t0 = Date.now();
       const testes = [];
       for (const model of GEMINI_MODELS) {
         try {
@@ -199,6 +202,7 @@ export default async function handler(req, res) {
               "x-goog-api-key": GEMINI_API_KEY,
               "Api-Revision": "2026-05-20"
             },
+            signal: AbortSignal.timeout(12000),
             body: JSON.stringify({ model, store: false, input: "Responda apenas OK" })
           });
           const j = await r.json().catch(() => ({}));
@@ -208,7 +212,8 @@ export default async function handler(req, res) {
               gemini_ok: true,
               modelo_ativo: model,
               endpoint: "interactions",
-              status_http: r.status
+              status_http: r.status,
+              latencia_ms: Date.now() - t0
             });
           }
           testes.push({ model, endpoint: "interactions", status: r.status, erro: j?.error?.message || j?.[0]?.error?.message || "Erro HTTP" });
@@ -401,6 +406,64 @@ export default async function handler(req, res) {
 
       await atualizarComprovanteSupabase(comprovante_id, patch);
       return res.status(200).json({ success: true });
+    }
+
+    // -----------------------------------------------------------------
+    // AÇÃO 4: TESTE DRY-RUN DE AUDITORIA (NÃO ALTERA SALDO NEM ENVIA WHATSAPP)
+    // -----------------------------------------------------------------
+    if (body.action === "testar_auditoria_dryrun") {
+      const { base64, mimeType: declaredMime, fileName, textoMensagem, contextoRecente, senderPhone, pushName } = body;
+      if (!base64) {
+        return res.status(400).json({ error: "base64 é obrigatório para dry-run." });
+      }
+      const t0 = Date.now();
+      const { cleanBase64, mimeType } = detectarMimeReal(base64, declaredMime || "", fileName || "");
+      const todosFormandos = await buscarTodosFormandosSupabase();
+      const resultadoGemini = await analisarComprovanteComGemini({
+        cleanBase64,
+        mimeType,
+        fileName: fileName || "",
+        textoMensagem: textoMensagem || "",
+        contextoRecente: contextoRecente || "",
+        pushName: pushName || "",
+        todosFormandos,
+        apiKey: GEMINI_API_KEY
+      });
+      const match = vincularFormandoComSeguranca({
+        todosFormandos,
+        senderPhone: senderPhone || "",
+        pushName: pushName || "",
+        ocr: resultadoGemini.ocr,
+        textoMensagem: textoMensagem || "",
+        nomeArquivo: fileName || "",
+        contextoRecente: contextoRecente || ""
+      });
+      const saudacaoSegura = match.formando
+        ? escolherSaudacaoSegura({
+            formando: match.formando,
+            matchTelefone: match.matchTelefone,
+            nomePagador: resultadoGemini.ocr?.nome_pagador,
+            pushName: pushName || ""
+          })
+        : "";
+      return res.status(200).json({
+        dry_run: true,
+        latencia_ms: Date.now() - t0,
+        mime_detectado: mimeType,
+        modelo_usado: resultadoGemini.modeloUsado,
+        erro_ocr: resultadoGemini.erro,
+        ocr: resultadoGemini.ocr,
+        vinculo: {
+          confianca: match.confianca,
+          motivo: match.motivo,
+          matchTelefone: match.matchTelefone,
+          formando_id: match.formando?.id || null,
+          formando_nome: match.formando?.nome || null,
+          responsavel: match.formando?.responsavel || null,
+          saudacao_segura: saudacaoSegura,
+          candidatos: match.candidatos
+        }
+      });
     }
 
     // -----------------------------------------------------------------
@@ -1129,6 +1192,7 @@ async function chamarGeminiInteractions({ model, apiKey, prompt, cleanBase64, mi
         "x-goog-api-key": apiKey,
         "Api-Revision": "2026-05-20"
       },
+      signal: AbortSignal.timeout(20000),
       body: JSON.stringify({
         model,
         store: false,

@@ -535,8 +535,14 @@ export default async function handler(req, res) {
         }
       }
 
-      // 2. Buscar base64 (do payload ou da API da Evolution)
-      let mediaBase64 = data.base64 || "";
+      // 2. Buscar base64 (Evolution v2 envia em data.message.base64; fallback para data.base64 ou API da Evolution)
+      let mediaBase64 =
+        data.message?.base64 ||
+        data.base64 ||
+        body.base64 ||
+        data.message?.imageMessage?.base64 ||
+        data.message?.documentMessage?.base64 ||
+        "";
       if ((!mediaBase64 || mediaBase64.length < 100) && key.id) {
         mediaBase64 = await buscarBase64Evolution(key, data.message);
       }
